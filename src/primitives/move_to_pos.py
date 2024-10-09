@@ -2,19 +2,22 @@ from queue import Queue
 
 import jax
 from craftax.craftax.craftax_state import EnvState
-from craftax.craftax.constants import DIRECTIONS, COLLISION_LAND_CREATURE, OBS_DIM
+from craftax.craftax.constants import DIRECTIONS, COLLISION_LAND_CREATURE, OBS_DIM, Action
 from craftax.craftax.game_logic import is_position_in_bounds_not_in_mob_not_colliding
 
 from primitives.utils import get_obs_mask, is_in_obs
 import networkx as nx
 
 DIRECTIONS_TO_ACTIONS = {
-    (0, 0): 0,
-    (0, -1): 1,
-    (0, 1): 2,
-    (-1, 0): 3,
-    (1, 0): 4
+    (0, 0): Action.NOOP,
+    (0, -1): Action.LEFT,
+    (0, 1): Action.RIGHT,
+    (-1, 0): Action.UP,
+    (1, 0): Action.DOWN
 }
+
+def to_node(pos: jax.numpy.ndarray):
+    return pos[0].item(), pos[1].item()
 
 
 def valid_block(state, pos, mask=None):
@@ -36,25 +39,10 @@ def valid_block(state, pos, mask=None):
             is_in_obs(state, pos, mask))
 
 
-def gen_graph(state: EnvState, target_pos: jax.numpy.ndarray):
-    """
-    Generates a graph of the positions reachable from the player in the current state.
-    The graph has nodes for each position reachable from the player and edges between
-    positions that are adjacent. The start node is the player's current position and the
-    target node is the given target position. Target node is included even if it is not
-    valid.
-
-    Args:
-        state: The current state of the environment.
-        target_pos: The 2D coordinates of the target position.
-
-    Returns:
-        A networkx Graph of the positions reachable from the player.
-    """
+def gen_graph(state: EnvState):
     mask = get_obs_mask(state)
     start_pos = state.player_position
-    start_node = (start_pos[0].item(), start_pos[1].item())
-    target_node = (target_pos[0].item(), target_pos[1].item())
+    start_node = to_node(start_pos)
 
     nodes = set()
     edges = set()
@@ -64,19 +52,16 @@ def gen_graph(state: EnvState, target_pos: jax.numpy.ndarray):
 
     while not q.empty():
         cur = q.get()
-        cur_node = (cur[0].item(), cur[1].item())
+        cur_node = to_node(cur)
 
         for direction in DIRECTIONS[1:5]:
             neighbor = cur + direction
-            neighbor_node = (neighbor[0].item(), neighbor[1].item())
+            neighbor_node = to_node(neighbor)
             if neighbor_node in nodes: continue
+            nodes.add(neighbor_node)
+            edges.add((cur_node, neighbor_node))
             if valid_block(state, neighbor, mask):
-                nodes.add(neighbor_node)
-                edges.add((cur_node, neighbor_node))
                 q.put(neighbor)
-            elif neighbor_node == target_node:
-                nodes.add(neighbor_node)
-                edges.add((cur_node, neighbor_node))
 
     G = nx.Graph(nodes)
     G.add_edges_from(edges)
@@ -85,6 +70,7 @@ def gen_graph(state: EnvState, target_pos: jax.numpy.ndarray):
 def move_to_pos(state: EnvState, target_pos: jax.numpy.ndarray):
     """
     Generates a sequence of actions to move to a target position.
+    Graph is generated.
 
     Args:
         state: The current state of the environment.
@@ -93,9 +79,24 @@ def move_to_pos(state: EnvState, target_pos: jax.numpy.ndarray):
     Returns:
         A list of actions to move to the target position.
     """
-    G = gen_graph(state, target_pos)
-    nodes = nx.astar_path(G, (state.player_position[0].item(), state.player_position[1].item()),
-                            (target_pos[0].item(), target_pos[1].item()))
+    G = gen_graph(state)
+    if not nx.has_path(G, to_node(state.player_position), to_node(target_pos)): return []
+
+    nodes = nx.astar_path(G, source=to_node(state.player_position), target=to_node(target_pos))
+
+    actions = []
+    for i in range(len(nodes) - 1):
+        actions.append(DIRECTIONS_TO_ACTIONS[
+                           (nodes[i + 1][0] - nodes[i][0],
+                            nodes[i + 1][1] - nodes[i][1])
+                       ])
+    return actions
+
+
+def move_to_node(state: EnvState, G: nx.Graph, target_node: jax.numpy.ndarray):
+    if not nx.has_path(G, to_node(state.player_position), target_node): return []
+
+    nodes = nx.astar_path(G, source=to_node(state.player_position), target=target_node)
 
     actions = []
     for i in range(len(nodes) - 1):

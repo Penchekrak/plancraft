@@ -1,16 +1,10 @@
 import unittest
-from time import sleep
 
 import jax
-import matplotlib.pyplot as plt
 from craftax.craftax_env import make_craftax_env_from_name
 
 from primitives.move_to_pos import move_to_pos
 from primitives.utils import *
-import craftax.craftax.renderer as renderer
-import importlib
-from PIL import Image
-import numpy as np
 
 
 
