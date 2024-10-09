@@ -67,6 +67,7 @@ def gen_graph(state: EnvState):
     G.add_edges_from(edges)
     return G
 
+
 def move_to_pos(state: EnvState, target_pos: jax.numpy.ndarray):
     """
     Generates a sequence of actions to move to a target position.
@@ -80,7 +81,7 @@ def move_to_pos(state: EnvState, target_pos: jax.numpy.ndarray):
         A list of actions to move to the target position.
     """
     G = gen_graph(state)
-    if not nx.has_path(G, to_node(state.player_position), to_node(target_pos)): return []
+    if not to_node(target_pos) in G.nodes: return []
 
     nodes = nx.astar_path(G, source=to_node(state.player_position), target=to_node(target_pos))
 
@@ -94,7 +95,7 @@ def move_to_pos(state: EnvState, target_pos: jax.numpy.ndarray):
 
 
 def move_to_node(state: EnvState, G: nx.Graph, target_node: jax.numpy.ndarray):
-    if not nx.has_path(G, to_node(state.player_position), target_node): return []
+    if not target_node in G.nodes: return []
 
     nodes = nx.astar_path(G, source=to_node(state.player_position), target=target_node)
 
