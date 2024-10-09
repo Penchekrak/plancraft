@@ -38,7 +38,7 @@ class TestModeToPos(unittest.TestCase):
         actions = move_to_pos(state, target)
         print(actions)
         for action in actions:
-            obs, state, reward, done, info = self.env.step(self.rngs[2], state, action, self.env_params)
+            obs, state, reward, done, info = self.env.step(self.rngs[2], state, action.value, self.env_params)
 
         self.assertEqual(state.player_position.tolist(), target.tolist())
 
