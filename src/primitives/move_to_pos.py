@@ -18,7 +18,6 @@ DIRECTIONS_TO_ACTIONS = {
 
 
 def valid_block(state, pos, mask=None):
-def valid_block(state, pos, mask=None):
     """
     Checks if a given position is valid in the current state.
     A position is valid if it is within the bounds of the current level,
