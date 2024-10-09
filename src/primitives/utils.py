@@ -2,72 +2,98 @@ from typing import Optional, Tuple
 
 import jax.numpy
 from craftax.craftax.craftax_state import EnvState
-from craftax.craftax.constants import SOLID_BLOCK_MAPPING, SOLID_BLOCKS
+from craftax.craftax.constants import OBS_DIM
 import jax.numpy as jnp
-from jax import Array
 
 
-def obs_blocks(obs):
+def get_obs_mask(state: EnvState):
     """
-    Extracts the visible blocks from a given observation.
+    Generates a mask of the observation area around the player.
 
-    The blocks are represented as a 2D array of shape (9, 11) where each entry is a
-    block ID. The block IDs are taken from the constants in craftax.constants.
+    Args:
+    state: The current state of the environment.
 
-    Parameters
-    ----------
-    obs: Array
-        The observation to extract the blocks from. This should be a JAX array of
-        shape (8217,) or (9, 11, 83).
-
-    Returns
-    -------
-    visible_blocks: Array
-        The visible blocks as a 2D array of shape (9, 11).
+    Returns:
+    A 3D array of shape (floors, height, width) where values are 1 if the block is in the observation area and 0 otherwise.
     """
-    visible_blocks = obs[0:8217].reshape(9, 11, 83)[:, :, 0:37].argmax(axis=-1)
-    return visible_blocks
+    y, x = state.player_position
+    floors, h, w = state.map.shape
+    mask = jnp.zeros_like(state.map, dtype=jnp.int32)
+    mask = mask.at[
+           state.player_level,
+           max(0, y - OBS_DIM[0] // 2) : min(h, y + OBS_DIM[0] // 2 + 1),
+           max(0, x - OBS_DIM[1] // 2) : min(w, x + OBS_DIM[1] // 2 + 1)
+           ].set(1)
+
+    return mask
 
 
-def get_global_from_local(state: EnvState, local: jax.numpy.ndarray) -> jax.numpy.ndarray:
+def is_in_obs(state: EnvState, pos: jax.Array, mask = None, level=None):
     """
-    Converts local coordinates to global coordinates.
+    Checks if a given position is in the observation area of the player in the given state.
 
-    This function takes the current state of the environment and local coordinates
-    as input, and returns the corresponding global coordinates.
+    Args:
+        state: The current state of the environment.
+        pos: The 2D coordinates of the position to check.
+        mask: Optionally, a precomputed mask of the observation area. If not given, `get_obs_mask(state)` is used.
+        level: Optionally, the level to check. If not given, `state.player_level` is used.
 
-    Parameters
-    ----------
-    state: EnvState
-        The current state of the environment.
-    local: jax.numpy.ndarray
-        The local coordinates to be converted.
-
-    Returns
-    -------
-    global_pos: jax.numpy.ndarray
-        The global coordinates corresponding to the input local coordinates.
+    Returns:
+        True if the block at `pos` is in the observation area, False otherwise.
     """
-    # Get the player's current position from the environment state
-    player_pos = state.player_position
-
-    # Calculate the local coordinates centered around the player's position
-    local_centered = jnp.array([local[0] - 4, local[1] - 5])
-
-    # Calculate the global coordinates by adding the player's position to the centered local coordinates
-    global_pos = player_pos + local_centered
-
-    return global_pos
+    mask = mask if mask is not None else get_obs_mask(state)
+    level = level if level is not None else state.player_level
+    return mask[level, pos[0], pos[1]]
 
 
-def get_block_offset_any(
-    obs: jax.numpy.ndarray, block_id: int
-) -> jax.numpy.ndarray | None:
+def find_block_any(
+        state: EnvState,
+        block_id,
+        level: Optional[int] = None
+):
     """
-    Given an observation and a block ID, return the coordinates of any block with that ID in the observation.
-    Returns local coordinates if the block is found or None if it is not found.
+    Finds the coordinates of any block with the given ID in the observation area of the given state.
+
+    Args:
+        state: The current state of the environment.
+        block_id: The ID of the block to find.
+        level: Optionally, the level to search. If not given, `state.player_level` is used.
+
+    Returns:
+        The 2D coordinates of the block if found, or None if no such block is in the observation area.
     """
-    res = jax.numpy.where(obs_blocks(obs) == block_id)
-    if res[0].shape[0] == 0:
+    res = find_block_all(state, block_id, level)
+
+    if res.shape[0] == 0:
         return None
-    return jnp.array([res[0][0], res[1][0]])
+    return res[0]
+
+def find_block_all(
+        state: EnvState,
+        block_id: int,
+        level: Optional[int] = None
+) -> jax.numpy.ndarray:
+    """
+    Finds all blocks with the given ID in the observation area of the given state.
+
+    Args:
+        state: The current state of the environment.
+        block_id: The ID of the block to find.
+        level: Optionally, the level to search. If not given, `state.player_level` is used.
+
+    Returns:
+        A 2D array of shape (num_blocks, 2) where the first column is the x-coordinate
+        and the second column is the y-coordinate.
+    """
+    level = level if level is not None else state.player_level
+    map_level = state.map[level]
+    obs_mask = get_obs_mask(state)[level]
+
+    res = jax.numpy.where(
+        jax.numpy.logical_and(
+            obs_mask,
+            map_level == block_id
+        )
+    )
+
+    return jnp.stack(res, axis=1)
