@@ -4,7 +4,7 @@ import numpy as np
 from craftax.craftax.craftax_state import EnvState
 
 
-from primitives.move_to_pos import to_node
+from .move_to_node_smart import to_node
 
 
 def explore_round(state: EnvState, G: nx.Graph, prev_pos: jax.numpy.ndarray = None, dist = 5):
