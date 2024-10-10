@@ -52,7 +52,25 @@ BLOCK_WEIGHT = {
 }
 
 
-def gen_graph_smart(state: EnvState) -> nx.DiGraph:
+NEED_DIG = [
+    BlockType.STONE.value,
+    BlockType.COAL.value,
+    BlockType.IRON.value,
+    BlockType.DIAMOND.value,
+    BlockType.CRAFTING_TABLE.value,
+    BlockType.FURNACE.value,
+    BlockType.WOOD.value,
+    BlockType.TREE.value
+]
+
+NEED_PLACE = [
+    BlockType.WATER.value,
+    BlockType.LAVA.value
+]
+
+def gen_graph_smart(state: EnvState,
+                    can_dig=True, 
+                    can_place=True) -> nx.DiGraph:
     mask = get_obs_mask(state)
     start_pos = state.player_position
     level = state.player_level
@@ -73,12 +91,18 @@ def gen_graph_smart(state: EnvState) -> nx.DiGraph:
                 if not is_in_obs(state, neighbor, mask, level):
                     continue
                 G.add_node(neighbor_node, block_type=neighbor_type)
-                G.add_edge(cur_node, neighbor_node, weight=BLOCK_WEIGHT[neighbor_type],
-                           direction=direction)
+                wight = BLOCK_WEIGHT[neighbor_type]
+                if neighbor_type in NEED_DIG and not can_dig:
+                    wight = INF_WEIGHT
+                if neighbor_type in NEED_PLACE and not can_place:
+                    wight = INF_WEIGHT
+                    
+                G.add_edge(cur_node, neighbor_node, weight=wight, direction=direction)
     return G
 
 
-def move_to_node_smart(state: EnvState, G: nx.DiGraph, target_node: tuple[int, int], last_step=True) -> list[Action]:
+def move_to_node_smart(state: EnvState, G: nx.DiGraph, 
+                       target_node: tuple[int, int], last_step=True) -> list[Action]:
     if not target_node in G.nodes: return []
 
     nodes = nx.dijkstra_path(G, source=to_node(state.player_position), target=target_node)
