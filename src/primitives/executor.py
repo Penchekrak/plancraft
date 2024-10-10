@@ -8,5 +8,4 @@ def executor(env, action_list: list[Action], log_file='../logs/actions.csv', see
 
     # execute actions
     for action in action_list:
-        pass
-        # TODO: work with seed
+        obs, state, reward, done, info = env.step(action)
