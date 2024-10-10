@@ -5,7 +5,7 @@ from craftax.craftax.craftax_state import EnvState
 from craftax.craftax.constants import DIRECTIONS, COLLISION_LAND_CREATURE, OBS_DIM, Action
 from craftax.craftax.game_logic import is_position_in_bounds_not_in_mob_not_colliding
 
-from primitives.utils import get_obs_mask, is_in_obs
+from .utils import get_obs_mask, is_in_obs
 import networkx as nx
 
 DIRECTIONS_TO_ACTIONS = {
