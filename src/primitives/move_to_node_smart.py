@@ -99,13 +99,13 @@ def gen_graph_smart(state: EnvState,
                 if not is_in_obs(state, neighbor, mask, level):
                     continue
                 G.add_node(neighbor_node, block_type=neighbor_type)
-                wight = BLOCK_WEIGHT[neighbor_type]
+                weight = BLOCK_WEIGHT[neighbor_type]
                 if neighbor_type in NEED_DIG and not can_dig:
-                    wight = INF_WEIGHT
+                    continue
                 if neighbor_type in NEED_PLACE and not can_place:
-                    wight = INF_WEIGHT
+                    continue
                     
-                G.add_edge(cur_node, neighbor_node, weight=wight, direction=direction)
+                G.add_edge(cur_node, neighbor_node, weight=weight, direction=direction)
     return G
 
 
