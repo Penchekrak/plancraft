@@ -4,8 +4,9 @@ import networkx as nx
 from craftax.craftax.constants import DIRECTIONS, BlockType, OBS_DIM, Action
 from craftax.craftax.craftax_state import EnvState
 
-from utils import get_obs_mask, is_in_obs
-from executor import executor
+# from .move_to_pos import to_node, DIRECTIONS_TO_ACTIONS
+from .utils import get_obs_mask, is_in_obs
+from .executor import executor
 
 DIRECTIONS_TO_ACTIONS = {
     (0, 0): Action.NOOP,
@@ -15,10 +16,12 @@ DIRECTIONS_TO_ACTIONS = {
     (1, 0): Action.DOWN
 }
 
+
 def to_node(pos: jax.numpy.ndarray):
     return pos[0].item(), pos[1].item()
 
-INF_WEIGHT = 10**6
+
+INF_WEIGHT = 10 ** 6
 BLOCK_WEIGHT = {
     BlockType.INVALID.value: INF_WEIGHT,
     BlockType.OUT_OF_BOUNDS.value: INF_WEIGHT,
@@ -77,8 +80,9 @@ NEED_PLACE = [
     BlockType.LAVA.value
 ]
 
+
 def gen_graph_smart(state: EnvState,
-                    can_dig=True, 
+                    can_dig=True,
                     can_place=True) -> nx.DiGraph:
     mask = get_obs_mask(state)
     start_pos = state.player_position
@@ -95,7 +99,7 @@ def gen_graph_smart(state: EnvState,
             for direction in DIRECTIONS[1:5]:
                 neighbor = cur_pos + direction
                 neighbor_node = to_node(neighbor)
-                neighbor_type = state.map[level][neighbor]
+                neighbor_type = state.map[level][neighbor[0], neighbor[1]].item()
 
                 if not is_in_obs(state, neighbor, mask, level):
                     continue
@@ -105,13 +109,13 @@ def gen_graph_smart(state: EnvState,
                     wight = INF_WEIGHT
                 if neighbor_type in NEED_PLACE and not can_place:
                     wight = INF_WEIGHT
-                    
+
                 G.add_edge(cur_node, neighbor_node, weight=wight, direction=direction)
     return G
 
 
 def move_to_node_planner(state: EnvState, G: nx.DiGraph,
-                       target_node: tuple[int, int], last_step=True) -> list[Action]:
+                         target_node: tuple[int, int], last_step=True) -> list[Action]:
     if not target_node in G.nodes: return []
 
     nodes = nx.dijkstra_path(G, source=to_node(state.player_position), target=target_node)
@@ -132,16 +136,17 @@ def move_to_node_planner(state: EnvState, G: nx.DiGraph,
                           BlockType.FURNACE.value,
                           BlockType.WOOD.value,
                           BlockType.TREE.value]:
-            actions.append(DIRECTIONS_TO_ACTIONS(direction))
-            actions.append(Action.DO.value)
+            actions.append(DIRECTIONS_TO_ACTIONS[direction])
+            actions.append(Action.DO)
         if block_type in [BlockType.WATER.value,
                           BlockType.LAVA.value]:
-            actions.append(DIRECTIONS_TO_ACTIONS(direction))
-            actions.append(Action.PLACE_STONE.value)
+            actions.append(DIRECTIONS_TO_ACTIONS[direction])
+            actions.append(Action.PLACE_STONE)
 
-        actions.append(DIRECTIONS_TO_ACTIONS(direction))
-        
+        actions.append(DIRECTIONS_TO_ACTIONS[direction])
+
     return actions
+
 
 def move_to_pos(env, target_pos: jax.numpy.ndarray, can_dig=True, can_place=True):
     state = env.saved_state
@@ -150,5 +155,5 @@ def move_to_pos(env, target_pos: jax.numpy.ndarray, can_dig=True, can_place=True
     target_node = to_node(target_pos)
     if not target_node in G.nodes:
         return
-    act_plan = move_to_node_planner(env, G, target_node)
+    act_plan = move_to_node_planner(env.saved_state, G, target_node)
     executor(env, act_plan)
