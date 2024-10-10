@@ -1,25 +1,14 @@
+from operator import index
+
 import jax
 import networkx as nx
-import numpy as np
 from craftax.craftax.craftax_state import EnvState
 
 
 from .move_to_node_smart import to_node
-np.random.seed(42)
 
-def explore_round(state: EnvState, G: nx.Graph, prev_pos: jax.numpy.ndarray = None, dist = 4):
-    """
-    Choose a node in the graph to move to.
-
-    Args:
-    state: The current state of the environment.
-    G: The graph of the environment.
-    prev_pos: The position that the player is currently at.
-    dist: The maximum distance to move.
-
-    Returns:
-    The node to move to as an numpy array of shape (2,).
-    """
+def explore_round(env, G: nx.Graph, prev_pos: jax.numpy.ndarray = None, dist = 4):
+    state: EnvState = env.saved_state
     if not to_node(prev_pos) in G.nodes: return None
     nodes = jax.numpy.array(list(G.nodes), dtype=jax.numpy.int32)
 
@@ -38,7 +27,9 @@ def explore_round(state: EnvState, G: nx.Graph, prev_pos: jax.numpy.ndarray = No
         direction_mask = jax.numpy.ones(direction_vectors.shape[0], dtype=bool)
 
     for cool_distance in range(dist, 0, -1):
-        indexes = jax.numpy.where(jax.numpy.logical_and(distances == cool_distance, direction_mask))
+        indexes = jax.numpy.where(jax.numpy.logical_and(distances == cool_distance, direction_mask))[0]
         if len(indexes) == 0: continue
-        return nodes[np.random.choice(np.array(indexes[0]))]
+        env.rng, rng = jax.random.split(env.rng)
+        idx = jax.random.choice(rng, indexes)
+        return nodes[idx]
     return None
