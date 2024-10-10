@@ -51,7 +51,6 @@ BLOCK_WEIGHT = {
     BlockType.NECROMANCER_VULNERABLE.value: INF_WEIGHT
 }
 
-
 NEED_DIG = [
     BlockType.STONE.value,
     BlockType.COAL.value,
@@ -101,7 +100,7 @@ def gen_graph_smart(state: EnvState,
     return G
 
 
-def move_to_node_smart(state: EnvState, G: nx.DiGraph, 
+def move_to_node_planner(state: EnvState, G: nx.DiGraph,
                        target_node: tuple[int, int], last_step=True) -> list[Action]:
     if not target_node in G.nodes: return []
 
@@ -133,3 +132,13 @@ def move_to_node_smart(state: EnvState, G: nx.DiGraph,
         actions.append(DIRECTIONS_TO_ACTIONS(direction))
         
     return actions
+
+def move_to_pos(env, target_pos: jax.numpy.ndarray, can_dig=True, can_place=True):
+    state = env.get_state()
+
+    G = gen_graph_smart(state, can_dig, can_place)
+    target_node = to_node(target_pos)
+    if not target_node in G.nodes:
+        return
+    act_plan = move_to_node_planner(env, G, target_node)
+    action_executor(env, act_plan)
