@@ -4,9 +4,19 @@ import networkx as nx
 from craftax.craftax.constants import DIRECTIONS, BlockType, OBS_DIM, Action
 from craftax.craftax.craftax_state import EnvState
 
-from move_to_pos import to_node, DIRECTIONS_TO_ACTIONS
 from utils import get_obs_mask, is_in_obs
 from executor import executor
+
+DIRECTIONS_TO_ACTIONS = {
+    (0, 0): Action.NOOP,
+    (0, -1): Action.LEFT,
+    (0, 1): Action.RIGHT,
+    (-1, 0): Action.UP,
+    (1, 0): Action.DOWN
+}
+
+def to_node(pos: jax.numpy.ndarray):
+    return pos[0].item(), pos[1].item()
 
 INF_WEIGHT = 10**6
 BLOCK_WEIGHT = {
