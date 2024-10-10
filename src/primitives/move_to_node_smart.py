@@ -3,8 +3,8 @@ import networkx as nx
 from craftax.craftax.constants import DIRECTIONS, BlockType, OBS_DIM, Action
 from craftax.craftax.craftax_state import EnvState
 
-from utils import get_obs_mask, is_in_obs
-from executor import executor
+from .utils import get_obs_mask, is_in_obs
+from .executor import executor
 
 DIRECTIONS_TO_ACTIONS = {
     (0, 0): Action.NOOP,
@@ -17,7 +17,7 @@ DIRECTIONS_TO_ACTIONS = {
 def to_node(pos: jax.numpy.ndarray):
     return pos[0].item(), pos[1].item()
 
-INF_WEIGHT = 10**6
+INF_WEIGHT = 10 ** 6
 BLOCK_WEIGHT = {
     BlockType.INVALID.value: INF_WEIGHT,
     BlockType.OUT_OF_BOUNDS.value: INF_WEIGHT,
@@ -77,7 +77,7 @@ NEED_PLACE = [
 ]
 
 def gen_graph_smart(state: EnvState,
-                    can_dig=True, 
+                    can_dig=True,
                     can_place=True) -> nx.DiGraph:
     mask = get_obs_mask(state)
     start_pos = state.player_position
@@ -125,10 +125,10 @@ def move_to_node_planner(state: EnvState, G: nx.DiGraph,
 
         if block_type in NEED_DIG:
             actions.append(DIRECTIONS_TO_ACTIONS[direction])
-            actions.append(Action.DO.value)
+            actions.append(Action.DO)
         if block_type in NEED_PLACE:
             actions.append(DIRECTIONS_TO_ACTIONS[direction])
-            actions.append(Action.PLACE_STONE.value)
+            actions.append(Action.PLACE_STONE)
 
         actions.append(DIRECTIONS_TO_ACTIONS[direction])
         
@@ -140,7 +140,6 @@ def move_to_pos(env, target_pos: jax.numpy.ndarray, G: nx.DiGraph = None, can_di
     if G is None:
         G = gen_graph_smart(state, can_dig, can_place)
     target_node = to_node(target_pos)
-
     if not target_node in G.nodes:
         return
     act_plan = move_to_node_planner(env.saved_state, G, target_node)
