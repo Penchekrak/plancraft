@@ -1,5 +1,4 @@
-from queue import Queue
-
+import gym
 import jax
 import networkx as nx
 from craftax.craftax.constants import DIRECTIONS, BlockType, OBS_DIM, Action
@@ -7,6 +6,7 @@ from craftax.craftax.craftax_state import EnvState
 
 from primitives.move_to_pos import to_node, DIRECTIONS_TO_ACTIONS
 from primitives.utils import get_obs_mask, is_in_obs
+from primitives.executor import executor
 
 INF_WEIGHT = 10**6
 BLOCK_WEIGHT = {
@@ -134,11 +134,11 @@ def move_to_node_planner(state: EnvState, G: nx.DiGraph,
     return actions
 
 def move_to_pos(env, target_pos: jax.numpy.ndarray, can_dig=True, can_place=True):
-    state = env.get_state()
+    state = env.saved_state
 
     G = gen_graph_smart(state, can_dig, can_place)
     target_node = to_node(target_pos)
     if not target_node in G.nodes:
         return
     act_plan = move_to_node_planner(env, G, target_node)
-    action_executor(env, act_plan)
+    executor(env, act_plan)
