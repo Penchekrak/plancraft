@@ -4,7 +4,7 @@ def executor(env, action_list: list[Action], log_file='../logs/actions.csv', see
     # append acton_list to actions.csv
     with open(log_file, 'a') as f:
         for action in action_list:
-            f.write(f'{action.value},{seed}\n')
+            f.write(f'{action.value}\n')
 
     # execute actions
     for action in action_list:
