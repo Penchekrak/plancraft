@@ -123,9 +123,11 @@ def move_to_node_smart(state: EnvState, G: nx.DiGraph,
                           BlockType.FURNACE.value,
                           BlockType.WOOD.value,
                           BlockType.TREE.value]:
+            actions.append(DIRECTIONS_TO_ACTIONS(direction))
             actions.append(Action.DO.value)
         if block_type in [BlockType.WATER.value,
                           BlockType.LAVA.value]:
+            actions.append(DIRECTIONS_TO_ACTIONS(direction))
             actions.append(Action.PLACE_STONE.value)
 
         actions.append(DIRECTIONS_TO_ACTIONS(direction))
