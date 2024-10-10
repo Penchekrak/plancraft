@@ -4,9 +4,9 @@ import networkx as nx
 from craftax.craftax.constants import DIRECTIONS, BlockType, OBS_DIM, Action
 from craftax.craftax.craftax_state import EnvState
 
-from primitives.move_to_pos import to_node, DIRECTIONS_TO_ACTIONS
-from primitives.utils import get_obs_mask, is_in_obs
-from primitives.executor import executor
+from move_to_pos import to_node, DIRECTIONS_TO_ACTIONS
+from utils import get_obs_mask, is_in_obs
+from executor import executor
 
 INF_WEIGHT = 10**6
 BLOCK_WEIGHT = {
