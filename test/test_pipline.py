@@ -6,7 +6,7 @@ from primitives.gifs import visual_testing
 from primitives.move_to_node_smart import gen_graph_smart, move_to_pos
 from src.primitives.wrapper import SaveStateWrapper
 
-from src.primitives.utils import find_block_any
+from src.primitives.utils import find_block_any, find_block_all
 
 import craftax.craftax.renderer as renderer
 import importlib
@@ -25,9 +25,10 @@ if __name__ == '__main__':
             move_to_pos(env, pos, G, True, False)
             prev_pos = state.player_position
 
-        # print('Got ya! ', find_block_any(env.saved_state, BlockType.TREE.value),
-        #       env.saved_state.map[env.saved_state.player_level][find_block_any(env.saved_state, BlockType.TREE.value)])
-        move_to_pos(env, find_block_any(env.saved_state, BlockType.TREE.value))
+        trees = find_block_all(env.saved_state, BlockType.TREE.value)
+        closest_index = abs(trees - env.saved_state.player_position).sum(axis=-1).argmin()
+        closest_tree = trees[closest_index]
+        move_to_pos(env, closest_tree)
         prev_pos = env.saved_state.player_position
 
 
