@@ -14,4 +14,4 @@ def executor(env: SaveStateWrapper, action_list: list[Action]):
 
     # execute actions
     for action in action_list:
-        obs, state, reward, done, info = env.step(action.value)
+        obs, state, reward, done, info = env.step(action)
