@@ -8,10 +8,10 @@ from .executor import executor
 
 DIRECTIONS_TO_ACTIONS = {
     (0, 0): Action.NOOP,
-    (0, 1): Action.LEFT,
-    (0, -1): Action.RIGHT,
-    (1, 0): Action.UP,
-    (-1, 0): Action.DOWN
+    (0, -1): Action.LEFT,
+    (0, 1): Action.RIGHT,
+    (-1, 0): Action.UP,
+    (1, 0): Action.DOWN
 }
 
 def to_node(pos: jax.numpy.ndarray):
@@ -140,6 +140,7 @@ def move_to_pos(env, target_pos: jax.numpy.ndarray, G: nx.DiGraph = None, can_di
 
     if G is None:
         G = gen_graph_smart(state, can_dig, can_place)
+    print('target', target_pos)
     target_node = to_node(target_pos)
     if not target_node in G.nodes:
         return

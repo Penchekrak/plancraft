@@ -6,9 +6,13 @@ from craftax.craftax.craftax_state import EnvState
 
 
 from .move_to_node_smart import to_node
+from .vis_graph import visualize_grid_graph
+
 
 def explore_round(env, G: nx.Graph, prev_pos: jax.numpy.ndarray = None, dist = 4):
     state: EnvState = env.saved_state
+    # visualize_grid_graph(G)
+    print(prev_pos, state.player_position)
     if not to_node(prev_pos) in G.nodes: return None
     nodes = jax.numpy.array(list(G.nodes), dtype=jax.numpy.int32)
 
@@ -26,7 +30,7 @@ def explore_round(env, G: nx.Graph, prev_pos: jax.numpy.ndarray = None, dist = 4
     else:
         direction_mask = jax.numpy.ones(direction_vectors.shape[0], dtype=bool)
 
-    for cool_distance in range(dist, 0, -1):
+    for cool_distance in range(dist, -1, -1):
         indexes = jax.numpy.where(jax.numpy.logical_and(distances == cool_distance, direction_mask))[0]
         if len(indexes) == 0: continue
         env.rng, rng = jax.random.split(env.rng)
