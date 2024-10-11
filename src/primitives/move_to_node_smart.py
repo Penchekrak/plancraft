@@ -8,10 +8,10 @@ from .executor import executor
 
 DIRECTIONS_TO_ACTIONS = {
     (0, 0): Action.NOOP,
-    (0, -1): Action.LEFT,
-    (0, 1): Action.RIGHT,
-    (-1, 0): Action.UP,
-    (1, 0): Action.DOWN
+    (0, 1): Action.LEFT,
+    (0, -1): Action.RIGHT,
+    (1, 0): Action.UP,
+    (-1, 0): Action.DOWN
 }
 
 def to_node(pos: jax.numpy.ndarray):
@@ -121,6 +121,7 @@ def move_to_node_planner(state: EnvState, G: nx.DiGraph,
         if not last_step and i == len(nodes) - 1: break
 
         direction: tuple[int, int] = G.edges[cur_node, next_node]["direction"].tolist()
+        direction = tuple(direction)
         block_type = G.nodes[next_node]['block_type']
 
         if block_type in NEED_DIG:

@@ -6,10 +6,12 @@ import jax.numpy as jnp
 from PIL import Image
 from craftax.craftax.constants import Action
 
+from primitives.wrapper import SaveStateWrapper
 
-def process_environment_step(env, renderer, state, action, rng, env_params, img_array):
+
+def process_environment_step(env: SaveStateWrapper, renderer, state, action, rng, env_params, img_array):
     """Processes an environment step and adds the rendered image to img_array."""
-    obs, state, reward, done, info = env.step(rng, state, jnp.array(action.value), env_params)
+    obs, state, reward, done, info = env.step(action.value)
 
     image_array = renderer.render_craftax_pixels(state, 16)  # Assuming '16' is pixel size
     img = Image.fromarray(np.array(image_array, dtype=np.uint8))
