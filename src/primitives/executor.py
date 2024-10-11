@@ -1,7 +1,7 @@
 from craftax.craftax.constants import Action
 import os
 
-from primitives.wrapper import SaveStateWrapper
+from .wrapper import SaveStateWrapper
 
 
 def executor(env: SaveStateWrapper, action_list: list[Action]):

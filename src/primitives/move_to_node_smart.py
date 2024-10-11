@@ -104,7 +104,7 @@ def gen_graph_smart(state: EnvState,
                     continue
                 if neighbor_type in NEED_PLACE and not can_place:
                     continue
-                    
+
                 G.add_edge(cur_node, neighbor_node, weight=weight, direction=direction)
     return G
 
@@ -132,7 +132,7 @@ def move_to_node_planner(state: EnvState, G: nx.DiGraph,
             actions.append(Action.PLACE_STONE)
 
         actions.append(DIRECTIONS_TO_ACTIONS[direction])
-        
+
     return actions
 
 def move_to_pos(env, target_pos: jax.numpy.ndarray, G: nx.DiGraph = None, can_dig=True, can_place=True):

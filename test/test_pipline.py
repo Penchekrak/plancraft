@@ -1,21 +1,31 @@
+import importlib
+import sys
+import os
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
+os.makedirs(log_dir, exist_ok=True)
+
 from craftax.craftax.constants import BlockType
 from craftax.craftax_env import make_craftax_env_from_name
+import craftax.craftax.renderer as renderer
 
-from primitives.explore import explore_round
-from primitives.gifs import visual_testing
-from primitives.move_to_node_smart import gen_graph_smart, move_to_pos
+from src.primitives.explore import explore_round
+from src.primitives.gifs import visual_testing
+from src.primitives.move_to_node_smart import gen_graph_smart, move_to_pos
+from src.primitives.utils import find_block_any, find_block_all
 from src.primitives.wrapper import SaveStateWrapper
 
-from src.primitives.utils import find_block_any, find_block_all
-
-import craftax.craftax.renderer as renderer
-import importlib
+SEED = 0xBAD_5EED_B00B5
 
 if __name__ == '__main__':
     importlib.reload(renderer)
     env = make_craftax_env_from_name("Craftax-Symbolic-v1", auto_reset=False)
-    env = SaveStateWrapper(env, seed=0xBAD_5EED_B00B5, log_dir='../logs/')
+    env = SaveStateWrapper(env, seed=SEED, log_dir=log_dir)
     obs, state = env.reset()
+
+    with open(log_dir + '/actions.txt', 'w') as f:
+        pass
 
     prev_pos = env.saved_state.player_position
     for i in range(10):
@@ -32,5 +42,5 @@ if __name__ == '__main__':
         prev_pos = env.saved_state.player_position
 
 
-    visual_testing(0xBAD_5EED_B00B5, '../logs/actions.txt', '../logs/', 1, env, renderer,
+    visual_testing(SEED, log_dir + '/actions.txt', log_dir, 1, env, renderer,
                    grid_size=(1, 1))

@@ -9,7 +9,7 @@ from craftax.craftax.constants import Action
 from craftax.craftax_env import make_craftax_env_from_name
 from pygame.examples.sprite_texture import renderer
 
-from primitives.wrapper import SaveStateWrapper
+from .wrapper import SaveStateWrapper
 
 
 def process_environment_step(env: SaveStateWrapper, renderer, state, action, rng, env_params, img_array):
@@ -78,12 +78,12 @@ def visual_testing(random_seed: int, file_path: str, path_to_save: str, num_trie
             # actions = function_to_test(state, **function_parameters)
             if not os.path.exists(file_path):
                 raise ValueError(f"No such file in given path: {file_path}")
-            
+
             with open(file_path, 'r') as f:
                 actions = []
                 for line in f:
                     actions.append(Action(int(line.strip())))
-            
+
             # assert len(actions) != 0, 'No actions found for this test function'
 
             i = 0
@@ -105,6 +105,7 @@ def visual_testing(random_seed: int, file_path: str, path_to_save: str, num_trie
         all_gif_arrays.append(img_array)
 
     # Generate the grid of GIFs
+    # print(path_to_save)
     create_gif_grid(all_gif_arrays, path_to_save, grid_size)
 
 if __name__ == '__main__':
