@@ -1,12 +1,9 @@
-from operator import index
-
 import jax
 import networkx as nx
 from craftax.craftax.craftax_state import EnvState
 
 
 from .move_to_node_smart import to_node
-from .vis_graph import visualize_grid_graph
 
 
 def explore_round(env, G: nx.Graph, prev_pos: jax.numpy.ndarray = None, dist = 4):

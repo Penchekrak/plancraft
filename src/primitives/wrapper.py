@@ -1,9 +1,4 @@
-import gym
-import os
 import jax
-from craftax.craftax.craftax_state import EnvState
-
-from types import MethodType
 from gym import Wrapper
 
 
