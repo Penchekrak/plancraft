@@ -1,3 +1,4 @@
+import importlib
 import os
 import tqdm
 import numpy as np
@@ -5,6 +6,8 @@ import jax
 import jax.numpy as jnp
 from PIL import Image
 from craftax.craftax.constants import Action
+from craftax.craftax_env import make_craftax_env_from_name
+from pygame.examples.sprite_texture import renderer
 
 from primitives.wrapper import SaveStateWrapper
 
@@ -103,3 +106,11 @@ def visual_testing(random_seed: int, file_path: str, path_to_save: str, num_trie
 
     # Generate the grid of GIFs
     create_gif_grid(all_gif_arrays, path_to_save, grid_size)
+
+if __name__ == '__main__':
+    importlib.reload(renderer)
+    env = make_craftax_env_from_name("Craftax-Symbolic-v1", auto_reset=False)
+    env = SaveStateWrapper(env, seed=0xBAD_5EED_B00B5, log_dir='../logs/')
+    obs, state = env.reset()
+    visual_testing(0xBAD_5EED_B00B5, '../logs/actions.txt', '../logs/', 1, env, renderer,
+                   grid_size=(1, 1))
