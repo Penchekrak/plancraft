@@ -17,6 +17,7 @@ from src.primitives.utils import find_block_any, find_block_all
 from src.primitives.wrapper import SaveStateWrapper
 
 SEED = 0xBAD_5EED_B00B5
+BLOCK_TYPE_VALUE = BlockType.IRON.value
 
 if __name__ == '__main__':
     importlib.reload(renderer)
@@ -29,13 +30,12 @@ if __name__ == '__main__':
 
     prev_pos = env.saved_state.player_position
     for i in range(10):
-        while find_block_any(env.saved_state, BlockType.TREE.value) is None:
+        while find_block_any(env.saved_state, BLOCK_TYPE_VALUE) is None:
             G = gen_graph_smart(env.saved_state, True, False)
             pos = explore_round(env, G, prev_pos)
             move_to_pos(env, pos, G, True, False)
-            prev_pos = state.player_position
-
-        trees = find_block_all(env.saved_state, BlockType.TREE.value)
+            prev_pos = env.saved_state.player_position
+        trees = find_block_all(env.saved_state, BLOCK_TYPE_VALUE)
         closest_index = abs(trees - env.saved_state.player_position).sum(axis=-1).argmin()
         closest_tree = trees[closest_index]
         move_to_pos(env, closest_tree)
