@@ -19,10 +19,10 @@ def explore_round(env, G: nx.Graph, prev_pos: jax.numpy.ndarray = None, dist = 5
     if prev_pos is not None:
         prev_direction = state.player_position - prev_pos[:, jax.numpy.newaxis]
         dot_products = direction_vectors.dot(prev_direction).sum(axis=-1)
-        if jax.numpy.any(dot_products >= 0.6):
-            direction_mask = dot_products >= 0.6
+        if jax.numpy.any(dot_products >= 0.3):
+            direction_mask = dot_products >= 0.3
         else:
-            direction_mask = dot_products < 0.6
+            direction_mask = dot_products < 0.3
     else:
         direction_mask = jax.numpy.ones(direction_vectors.shape[0], dtype=bool)
 

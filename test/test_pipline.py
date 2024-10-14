@@ -65,7 +65,7 @@ if __name__ == '__main__':
 
     for i in range(3):
         explore_and_chop(env, BlockType.COAL.value, can_dig=True, can_place=False)
-    for i in range(3):
+    for i in range(1):
         explore_and_chop(env, BlockType.IRON.value, can_dig=True, can_place=False)
 
     act_PLACE_FURNACE(env)
