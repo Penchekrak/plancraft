@@ -86,14 +86,24 @@ def find_block_all(
         and the second column is the y-coordinate.
     """
     level = level if level is not None else state.player_level
-    map_level = state.map[level]
     obs_mask = get_obs_mask(state)[level]
 
     res = jax.numpy.where(
         jax.numpy.logical_and(
             obs_mask,
-            map_level == block_id
+            state.map[level] == block_id
         )
     )
 
     return jnp.stack(res, axis=1)
+
+# def pr(arr):
+#     for i in range(18, 32):
+#         s = str(i) if i != state.player_position[0] else 'X '
+#         print(s, end=' ')
+#     print()
+#     for ind, row in enumerate(arr[19: 32], start=19):
+#         print(ind, end = ' ')
+#         for i in row[19: 32]:
+#             print(i, end = '  ' if i < 10 else ' ')
+#         print()

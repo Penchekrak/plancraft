@@ -39,7 +39,7 @@ def explore_and_chop(env: SaveStateWrapper, block_type, max_iter = 25, can_dig=F
     targets = find_block_all(env.saved_state, block_type)
     closest_target_index = abs(targets - env.saved_state.player_position).sum(axis=-1).argmin()
     closest_target = targets[closest_target_index]
-    move_to_pos(env, closest_target, last_step=False)
+    move_to_pos(env, closest_target)
     act_DO(env)
 
 if __name__ == '__main__':
