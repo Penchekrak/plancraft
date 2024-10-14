@@ -1,3 +1,5 @@
+from queue import Queue
+
 import jax
 import networkx as nx
 from craftax.craftax.constants import DIRECTIONS, BlockType, OBS_DIM, Action
@@ -67,7 +69,10 @@ NEED_DIG = [
     BlockType.DIAMOND.value,
     BlockType.CRAFTING_TABLE.value,
     BlockType.FURNACE.value,
-    BlockType.WOOD.value,
+    BlockType.WOOD.value
+]
+
+NEED_CHOP = [
     BlockType.TREE.value
 ]
 
@@ -86,26 +91,33 @@ def gen_graph_smart(state: EnvState,
     G = nx.DiGraph()
     G.add_node(to_node(start_pos), block_type=state.map[level][start_pos])
 
-    for y_offset in range(-OBS_DIM[0] // 2, OBS_DIM[0] // 2 + 1):
-        for x_offset in range(-OBS_DIM[1] // 2, OBS_DIM[1] // 2 + 1):
-            cur_pos = start_pos + jax.numpy.array([y_offset, x_offset])
-            cur_node = to_node(cur_pos)
+    q = Queue()
+    q.put(state.player_position)
+    # for y_offset in range(-OBS_DIM[0] // 2, OBS_DIM[0] // 2 + 1):
+    #     for x_offset in range(-OBS_DIM[1] // 2, OBS_DIM[1] // 2 + 1):
+    while not q.empty():
+        # cur_pos = start_pos + jax.numpy.array([y_offset, x_offset])
+        cur_pos = q.get()
+        cur_node = to_node(cur_pos)
 
-            for direction in DIRECTIONS[1:5]:
-                neighbor = cur_pos + direction
-                neighbor_node = to_node(neighbor)
-                neighbor_type = state.map[level][neighbor[0], neighbor[1]].item()
+        for direction in DIRECTIONS[1:5]:
+            neighbor = cur_pos + direction
+            neighbor_node = to_node(neighbor)
+            neighbor_type = state.map[level][neighbor[0], neighbor[1]].item()
 
-                if not is_in_obs(state, neighbor, mask, level):
-                    continue
-                G.add_node(neighbor_node, block_type=neighbor_type)
-                weight = BLOCK_WEIGHT[neighbor_type]
-                if neighbor_type in NEED_DIG and not can_dig:
-                    continue
-                if neighbor_type in NEED_PLACE and not can_place:
-                    continue
+            if not is_in_obs(state, neighbor, mask, level):
+                continue
+            if neighbor_type in NEED_DIG and not can_dig:
+                continue
+            if neighbor_type in NEED_PLACE and not can_place:
+                continue
 
-                G.add_edge(cur_node, neighbor_node, weight=weight, direction=direction)
+            if neighbor_node not in G.nodes():
+                q.put(neighbor)
+            weight = BLOCK_WEIGHT[neighbor_type]
+            G.add_node(neighbor_node, block_type=neighbor_type)
+            G.add_edge(cur_node, neighbor_node, weight=weight, direction=direction)
+
     return G
 
 
@@ -130,19 +142,24 @@ def move_to_node_planner(state: EnvState, G: nx.DiGraph,
         if block_type in NEED_PLACE:
             actions.append(DIRECTIONS_TO_ACTIONS[direction])
             actions.append(Action.PLACE_STONE)
+        if block_type in NEED_CHOP:
+            actions.append(DIRECTIONS_TO_ACTIONS[direction])
+            actions.append(Action.DO)
 
         actions.append(DIRECTIONS_TO_ACTIONS[direction])
 
     return actions
 
-def move_to_pos(env, target_pos: jax.numpy.ndarray, G: nx.DiGraph = None, can_dig=True, can_place=True):
+def move_to_pos(env, target_pos: jax.numpy.ndarray, G: nx.DiGraph = None,
+                can_dig=True, can_place=True, last_step=True):
     state = env.saved_state
 
     if G is None:
         G = gen_graph_smart(state, can_dig, can_place)
-    print('target', target_pos)
+
+    # print(*G.nodes(), sep='\n', end='\n\n')
     target_node = to_node(target_pos)
     if not target_node in G.nodes:
         return
-    act_plan = move_to_node_planner(env.saved_state, G, target_node)
+    act_plan = move_to_node_planner(env.saved_state, G, target_node, last_step=last_step)
     executor(env, act_plan)

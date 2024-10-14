@@ -2,14 +2,13 @@ import jax
 import networkx as nx
 from craftax.craftax.craftax_state import EnvState
 
-
 from .move_to_node_smart import to_node
 
 
-def explore_round(env, G: nx.Graph, prev_pos: jax.numpy.ndarray = None, dist = 4):
+def explore_round(env, G: nx.Graph, prev_pos: jax.numpy.ndarray = None, dist = 5):
     state: EnvState = env.saved_state
     # visualize_grid_graph(G)
-    print(prev_pos, state.player_position)
+    # print(prev_pos, state.player_position)
     if not to_node(prev_pos) in G.nodes: return None
     nodes = jax.numpy.array(list(G.nodes), dtype=jax.numpy.int32)
 
@@ -20,10 +19,10 @@ def explore_round(env, G: nx.Graph, prev_pos: jax.numpy.ndarray = None, dist = 4
     if prev_pos is not None:
         prev_direction = state.player_position - prev_pos[:, jax.numpy.newaxis]
         dot_products = direction_vectors.dot(prev_direction).sum(axis=-1)
-        if jax.numpy.any(dot_products >= 0):
-            direction_mask = dot_products >= 0
+        if jax.numpy.any(dot_products >= 0.6):
+            direction_mask = dot_products >= 0.6
         else:
-            direction_mask = dot_products < 0
+            direction_mask = dot_products < 0.6
     else:
         direction_mask = jax.numpy.ones(direction_vectors.shape[0], dtype=bool)
 
