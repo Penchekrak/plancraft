@@ -3,7 +3,7 @@ import sys
 import os
 
 from primitives.simple_actions import act_PLACE_TABLE, act_MAKE_WOOD_PICKAXE, act_DO, act_PLACE_FURNACE, \
-    act_MAKE_IRON_SWORD, act_MAKE_STONE_PICKAXE
+    act_MAKE_IRON_SWORD, act_MAKE_STONE_PICKAXE, act_MAKE_WOOD_SWORD, act_MAKE_STONE_SWORD, act_MAKE_IRON_PICKAXE
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
@@ -19,7 +19,7 @@ from src.primitives.move_to_node_smart import gen_graph_smart, move_to_pos
 from src.primitives.utils import find_block_any, find_block_all
 from src.primitives.wrapper import SaveStateWrapper
 
-SEED = 0xBAD_5EED_B00B
+SEED = 0xBAD_5EED_B00B5
 
 def explore_and_chop(env: SaveStateWrapper, block_type, max_iter = 25, can_dig=False, can_place=False):
     prev_pos = env.saved_state.player_position
@@ -30,8 +30,8 @@ def explore_and_chop(env: SaveStateWrapper, block_type, max_iter = 25, can_dig=F
         print(f'exploring for {BlockType(block_type).name}...')
         G = gen_graph_smart(env.saved_state, can_dig, can_place)
         pos = explore_round(env, G, prev_pos)
-        move_to_pos(env, pos, G, can_dig, can_place)
         prev_pos = env.saved_state.player_position
+        move_to_pos(env, pos, G, can_dig, can_place)
     else:
         print('no block found')
         return
@@ -39,7 +39,7 @@ def explore_and_chop(env: SaveStateWrapper, block_type, max_iter = 25, can_dig=F
     targets = find_block_all(env.saved_state, block_type)
     closest_target_index = abs(targets - env.saved_state.player_position).sum(axis=-1).argmin()
     closest_target = targets[closest_target_index]
-    move_to_pos(env, closest_target)
+    move_to_pos(env, closest_target, can_dig=can_dig, can_place=can_place)
     act_DO(env)
 
 if __name__ == '__main__':
@@ -53,7 +53,7 @@ if __name__ == '__main__':
 
     #do some stuff
     for i in range(8):
-        explore_and_chop(env, BlockType.TREE.value)
+        explore_and_chop(env, BlockType.TREE.value, can_dig=False, can_place=False)
 
     act_PLACE_TABLE(env)
     act_MAKE_WOOD_PICKAXE(env)
@@ -65,11 +65,21 @@ if __name__ == '__main__':
 
     for i in range(3):
         explore_and_chop(env, BlockType.COAL.value, can_dig=True, can_place=False)
-    for i in range(1):
+    for i in range(3):
+        explore_and_chop(env, BlockType.TREE.value)
+
+    for i in range(2):
         explore_and_chop(env, BlockType.IRON.value, can_dig=True, can_place=False)
 
     act_PLACE_FURNACE(env)
+    explore_and_chop(env, BlockType.STONE.value, can_dig=True, can_place=False)
+    act_PLACE_TABLE(env)
     act_MAKE_IRON_SWORD(env)
+    act_MAKE_IRON_PICKAXE(env)
+
+    explore_and_chop(env, BlockType.WATER.value, can_dig=True, can_place=True)
+    for i in range(5):
+        act_DO(env)
 
     # # Render
 

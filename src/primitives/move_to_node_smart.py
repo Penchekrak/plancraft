@@ -82,14 +82,14 @@ NEED_PLACE = [
 ]
 
 def gen_graph_smart(state: EnvState,
-                    can_dig=True,
-                    can_place=True) -> nx.DiGraph:
+                    can_dig=False,
+                    can_place=False) -> nx.DiGraph:
     mask = get_obs_mask(state)
     start_pos = state.player_position
     level = state.player_level
 
     G = nx.DiGraph()
-    G.add_node(to_node(start_pos), block_type=state.map[level][start_pos[0], start_pos[1]])
+    G.add_node(to_node(start_pos), block_type=state.map[level][start_pos[0], start_pos[1]].item())
 
     q = Queue()
     q.put(start_pos)
@@ -152,7 +152,7 @@ def move_to_node_planner(state: EnvState, G: nx.DiGraph,
     return actions
 
 def move_to_pos(env, target_pos: jax.numpy.ndarray, G: nx.DiGraph = None,
-                can_dig=True, can_place=True):
+                can_dig=False, can_place=False):
     state = env.saved_state
 
     if G is None:

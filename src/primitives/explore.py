@@ -23,7 +23,6 @@ def explore_round(env, G: nx.Graph, prev_pos: jax.numpy.ndarray = None, dist = 5
         # dot_products /= jax.numpy.sqrt(direction_vectors.dot(direction_vectors).sum())
         # dot_products /= jax.numpy.sqrt(prev_direction.dot(prev_direction).sum())
 
-        print(dot_products)
         if jax.numpy.any(dot_products >= 0):
             direction_mask = dot_products >= 0
         else:

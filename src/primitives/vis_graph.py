@@ -21,4 +21,4 @@ def visualize_grid_graph(G):
     # Настройка отображения сетки
     plt.grid(True)
     plt.gca().set_aspect('equal', adjustable='box')  # Сохраняем пропорции 1:1
-    plt.show()
+    plt.savefig('graph.png')
