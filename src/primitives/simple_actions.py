@@ -1,8 +1,5 @@
 from craftax.craftax.constants import Action
-from scipy.optimize import direct
-
 from .executor import executor
-from .move_to_node_smart import DIRECTIONS_TO_ACTIONS
 
 
 def act_DO(env):

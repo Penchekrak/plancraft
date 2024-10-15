@@ -5,23 +5,18 @@ from craftax.craftax.craftax_state import EnvState
 from .move_to_node_smart import to_node
 
 
-def explore_round(env, G: nx.Graph, prev_pos: jax.numpy.ndarray = None, dist = 5):
+def explore_choose_node(env, G: nx.Graph, prev_pos: jax.numpy.ndarray = None, dist = 5):
     state: EnvState = env.saved_state
-    # visualize_grid_graph(G)
-    # print(prev_pos, state.player_position)
     if not to_node(prev_pos) in G.nodes: return None
     nodes = jax.numpy.array(list(G.nodes), dtype=jax.numpy.int32)
 
     direction_vectors = nodes - state.player_position
-    # Manhattan distance
     distances = jax.numpy.sum(jax.numpy.abs(direction_vectors), axis=1)
 
     if prev_pos is not None:
         prev_direction = state.player_position - prev_pos[:, jax.numpy.newaxis]
 
         dot_products = direction_vectors.dot(prev_direction).sum(axis=-1)
-        # dot_products /= jax.numpy.sqrt(direction_vectors.dot(direction_vectors).sum())
-        # dot_products /= jax.numpy.sqrt(prev_direction.dot(prev_direction).sum())
 
         if jax.numpy.any(dot_products >= 0):
             direction_mask = dot_products >= 0

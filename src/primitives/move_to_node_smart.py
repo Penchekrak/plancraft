@@ -2,7 +2,7 @@ from queue import Queue
 
 import jax
 import networkx as nx
-from craftax.craftax.constants import DIRECTIONS, BlockType, OBS_DIM, Action
+from craftax.craftax.constants import DIRECTIONS, BlockType, Action
 from craftax.craftax.craftax_state import EnvState
 
 from .utils import get_obs_mask, is_in_obs
@@ -21,64 +21,64 @@ def to_node(pos: jax.numpy.ndarray):
 
 INF_WEIGHT = 10 ** 6
 BLOCK_WEIGHT = {
-    BlockType.INVALID.value: INF_WEIGHT,
-    BlockType.OUT_OF_BOUNDS.value: INF_WEIGHT,
-    BlockType.GRASS.value: 1,
-    BlockType.WATER.value: 15,
-    BlockType.STONE.value: 10,
-    BlockType.TREE.value: 10,
-    BlockType.WOOD.value: 10,
-    BlockType.PATH.value: 1,
-    BlockType.COAL.value: 10,
-    BlockType.IRON.value: 10,
-    BlockType.DIAMOND.value: 10,
-    BlockType.CRAFTING_TABLE.value: 15,
-    BlockType.FURNACE.value: 15,
-    BlockType.SAND.value: 1,
-    BlockType.LAVA.value: 15,
+    BlockType.INVALID: INF_WEIGHT,
+    BlockType.OUT_OF_BOUNDS: INF_WEIGHT,
+    BlockType.GRASS: 1,
+    BlockType.WATER: 15,
+    BlockType.STONE: 10,
+    BlockType.TREE: 10,
+    BlockType.WOOD: 10,
+    BlockType.PATH: 1,
+    BlockType.COAL: 10,
+    BlockType.IRON: 10,
+    BlockType.DIAMOND: 10,
+    BlockType.CRAFTING_TABLE: 15,
+    BlockType.FURNACE: 15,
+    BlockType.SAND: 1,
+    BlockType.LAVA: 15,
 
     # пока не работаем с этим
-    BlockType.PLANT.value: INF_WEIGHT,
-    BlockType.RIPE_PLANT.value: INF_WEIGHT,
-    BlockType.WALL.value: INF_WEIGHT,
-    BlockType.DARKNESS.value: INF_WEIGHT,
-    BlockType.WALL_MOSS.value: INF_WEIGHT,
-    BlockType.STALAGMITE.value: INF_WEIGHT,
-    BlockType.SAPPHIRE.value: INF_WEIGHT,
-    BlockType.RUBY.value: INF_WEIGHT,
-    BlockType.CHEST.value: INF_WEIGHT,
-    BlockType.FOUNTAIN.value: INF_WEIGHT,
-    BlockType.FIRE_GRASS.value: INF_WEIGHT,
-    BlockType.ICE_GRASS.value: INF_WEIGHT,
-    BlockType.GRAVEL.value: INF_WEIGHT,
-    BlockType.FIRE_TREE.value: INF_WEIGHT,
-    BlockType.ICE_SHRUB.value: INF_WEIGHT,
-    BlockType.ENCHANTMENT_TABLE_FIRE.value: INF_WEIGHT,
-    BlockType.ENCHANTMENT_TABLE_ICE.value: INF_WEIGHT,
-    BlockType.NECROMANCER.value: INF_WEIGHT,
-    BlockType.GRAVE.value: INF_WEIGHT,
-    BlockType.GRAVE2.value: INF_WEIGHT,
-    BlockType.GRAVE3.value: INF_WEIGHT,
-    BlockType.NECROMANCER_VULNERABLE.value: INF_WEIGHT
+    BlockType.PLANT: INF_WEIGHT,
+    BlockType.RIPE_PLANT: INF_WEIGHT,
+    BlockType.WALL: INF_WEIGHT,
+    BlockType.DARKNESS: INF_WEIGHT,
+    BlockType.WALL_MOSS: INF_WEIGHT,
+    BlockType.STALAGMITE: INF_WEIGHT,
+    BlockType.SAPPHIRE: INF_WEIGHT,
+    BlockType.RUBY: INF_WEIGHT,
+    BlockType.CHEST: INF_WEIGHT,
+    BlockType.FOUNTAIN: INF_WEIGHT,
+    BlockType.FIRE_GRASS: INF_WEIGHT,
+    BlockType.ICE_GRASS: INF_WEIGHT,
+    BlockType.GRAVEL: INF_WEIGHT,
+    BlockType.FIRE_TREE: INF_WEIGHT,
+    BlockType.ICE_SHRUB: INF_WEIGHT,
+    BlockType.ENCHANTMENT_TABLE_FIRE: INF_WEIGHT,
+    BlockType.ENCHANTMENT_TABLE_ICE: INF_WEIGHT,
+    BlockType.NECROMANCER: INF_WEIGHT,
+    BlockType.GRAVE: INF_WEIGHT,
+    BlockType.GRAVE2: INF_WEIGHT,
+    BlockType.GRAVE3: INF_WEIGHT,
+    BlockType.NECROMANCER_VULNERABLE: INF_WEIGHT
 }
 
 NEED_DIG = [
-    BlockType.STONE.value,
-    BlockType.COAL.value,
-    BlockType.IRON.value,
-    BlockType.DIAMOND.value,
-    BlockType.CRAFTING_TABLE.value,
-    BlockType.FURNACE.value,
-    BlockType.WOOD.value
+    BlockType.STONE,
+    BlockType.COAL,
+    BlockType.IRON,
+    BlockType.DIAMOND,
+    BlockType.CRAFTING_TABLE,
+    BlockType.FURNACE,
+    BlockType.WOOD
 ]
 
 NEED_CHOP = [
-    BlockType.TREE.value
+    BlockType.TREE
 ]
 
 NEED_PLACE = [
-    BlockType.WATER.value,
-    BlockType.LAVA.value
+    BlockType.WATER,
+    BlockType.LAVA
 ]
 
 def gen_graph_smart(state: EnvState,
@@ -89,7 +89,7 @@ def gen_graph_smart(state: EnvState,
     level = state.player_level
 
     G = nx.DiGraph()
-    G.add_node(to_node(start_pos), block_type=state.map[level][start_pos[0], start_pos[1]].item())
+    G.add_node(to_node(start_pos), block_type=BlockType(state.map[level][start_pos[0], start_pos[1]].item()))
 
     q = Queue()
     q.put(start_pos)
@@ -103,7 +103,7 @@ def gen_graph_smart(state: EnvState,
         for direction in DIRECTIONS[1:5]:
             neighbor = cur_pos + direction
             neighbor_node = to_node(neighbor)
-            neighbor_type = state.map[level][neighbor[0], neighbor[1]].item()
+            neighbor_type: BlockType = BlockType(state.map[level][neighbor[0], neighbor[1]].item())
 
             if not is_in_obs(state, neighbor, mask, level):
                 continue
@@ -133,7 +133,7 @@ def move_to_node_planner(state: EnvState, G: nx.DiGraph,
 
         direction: tuple[int, int] = G.edges[cur_node, next_node]["direction"].tolist()
         direction = tuple(direction)
-        block_type = G.nodes[next_node]['block_type']
+        block_type: BlockType = G.nodes[next_node]['block_type']
 
         actions.append(DIRECTIONS_TO_ACTIONS[direction])  # либо разворот в непроходимый блок, либо движение в проходимый
 

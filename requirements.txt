@@ -4,3 +4,5 @@ networkx~=3.3
 numpy~=2.1.2
 tqdm~=4.66.5
 pillow~=10.4.0
+gym~=0.26.2
+matplotlib

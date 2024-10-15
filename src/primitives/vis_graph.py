@@ -1,7 +1,6 @@
 import networkx as nx
 from matplotlib import pyplot as plt
 
-
 def visualize_grid_graph(G):
     """
     Функция для визуализации ориентированного графа на плоскости, где вершины

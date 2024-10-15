@@ -48,8 +48,8 @@ class TestEnvironment(unittest.TestCase):
         state: EnvState
         obs, state, reward, done, info = self.one_step(action)
 
-        self.assertTrue(find_block_all(state, 2).shape[1] == 2 and
-                        find_block_all(state, 2).shape[0] > 0)
+        self.assertTrue(find_block_all(state, BlockType(2)).shape[1] == 2 and
+                        find_block_all(state, BlockType(2)).shape[0] > 0)
 
     # test for find_block_any
     def test_find_block_any(self):

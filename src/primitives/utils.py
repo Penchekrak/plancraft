@@ -2,7 +2,7 @@ from typing import Optional, Tuple
 
 import jax.numpy
 from craftax.craftax.craftax_state import EnvState
-from craftax.craftax.constants import OBS_DIM
+from craftax.craftax.constants import OBS_DIM, BlockType
 import jax.numpy as jnp
 
 
@@ -48,7 +48,7 @@ def is_in_obs(state: EnvState, pos: jax.Array, mask = None, level=None):
 
 def find_block_any(
         state: EnvState,
-        block_id,
+        block_type: BlockType,
         level: Optional[int] = None
 ):
     """
@@ -56,13 +56,13 @@ def find_block_any(
 
     Args:
         state: The current state of the environment.
-        block_id: The ID of the block to find.
+        block_type: The BlockValue of the block to find.
         level: Optionally, the level to search. If not given, `state.player_level` is used.
 
     Returns:
         The 2D coordinates of the block if found, or None if no such block is in the observation area.
     """
-    res = find_block_all(state, block_id, level)
+    res = find_block_all(state, block_type, level)
 
     if res.shape[0] == 0:
         return None
@@ -70,7 +70,7 @@ def find_block_any(
 
 def find_block_all(
         state: EnvState,
-        block_id: int,
+        block_type: BlockType,
         level: Optional[int] = None
 ) -> jax.numpy.ndarray:
     """
@@ -78,7 +78,7 @@ def find_block_all(
 
     Args:
         state: The current state of the environment.
-        block_id: The ID of the block to find.
+        block_type: The BlockType of the block to find.
         level: Optionally, the level to search. If not given, `state.player_level` is used.
 
     Returns:
@@ -91,7 +91,7 @@ def find_block_all(
     res = jax.numpy.where(
         jax.numpy.logical_and(
             obs_mask,
-            state.map[level] == block_id
+            state.map[level] == block_type.value
         )
     )
 
