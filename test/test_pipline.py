@@ -3,14 +3,14 @@ import logging
 import sys
 import os
 
-from primitives.checks import check_inventory_wood
-from primitives.mine_block import mine_block
-from primitives.simple_actions import act_PLACE_TABLE, act_MAKE_WOOD_PICKAXE, act_DO, act_PLACE_FURNACE, \
-    act_MAKE_IRON_SWORD, act_MAKE_STONE_PICKAXE, act_MAKE_IRON_PICKAXE
-
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
 os.makedirs(log_dir, exist_ok=True)
+
+from src.primitives.checks import check_inventory_wood
+from src.primitives.mine_block import mine_block
+from src.primitives.simple_actions import act_PLACE_TABLE, act_MAKE_WOOD_PICKAXE, act_DO, act_PLACE_FURNACE, \
+    act_MAKE_IRON_SWORD, act_MAKE_STONE_PICKAXE, act_MAKE_IRON_PICKAXE
 
 from craftax.craftax.constants import BlockType
 from craftax.craftax_env import make_craftax_env_from_name
