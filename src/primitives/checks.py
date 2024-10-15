@@ -1,3 +1,8 @@
+from craftax.craftax.constants import DIRECTIONS, BlockType
+from craftax.craftax.craftax_state import EnvState
+
+## ITEMS
+
 def check_inventory_wood(env):
     """Returns the number of wood in the inventory."""
     return env.saved_state.inventory.wood
@@ -46,34 +51,45 @@ def check_inventory_books(env):
     """Returns the number of books in the inventory."""
     return env.saved_state.inventory.books
 
-def check_inventory_wood_pickaxe(env):
+## PICKAXES
+
+def check_inventory_wood_pickaxe(env) -> bool:
     """Returns True if the player has a wood pickaxe or better in the inventory, False otherwise."""
     return env.saved_state.inventory.pickaxe >= 1
 
-def check_inventory_stone_pickaxe(env):
+def check_inventory_stone_pickaxe(env) -> bool:
     """Returns True if the player has a stone pickaxe or better in the inventory, False otherwise."""
     return env.saved_state.inventory.pickaxe >= 2
 
-def check_inventory_iron_pickaxe(env):
+def check_inventory_iron_pickaxe(env) -> bool:
     """Returns True if the player has a iron pickaxe or better in the inventory, False otherwise."""
     return env.saved_state.inventory.pickaxe >= 3
 
-def check_inventory_diamond_pickaxe(env):
+def check_inventory_diamond_pickaxe(env) -> bool:
     """Returns True if the player has a diamond pickaxe or better in the inventory, False otherwise."""
     return env.saved_state.inventory.pickaxe >= 4
 
-def check_inventory_wood_sword(env):
+## SWORDS
+
+def check_inventory_wood_sword(env) -> bool:
     """Returns True if the player has a wood sword or better in the inventory, False otherwise."""
     return env.saved_state.inventory.sword >= 1
 
-def check_inventory_stone_sword(env):
+def check_inventory_stone_sword(env) -> bool:
     """Returns True if the player has a stone sword or better in the inventory, False otherwise."""
     return env.saved_state.inventory.sword >= 2
 
-def check_inventory_iron_sword(env):
+def check_inventory_iron_sword(env) -> bool:
     """Returns True if the player has a iron sword or better in the inventory, False otherwise."""
     return env.saved_state.inventory.sword >= 3
 
-def check_inventory_diamond_sword(env):
+def check_inventory_diamond_sword(env) -> bool:
     """Returns True if the player has a diamond sword or better in the inventory, False otherwise."""
     return env.saved_state.inventory.sword >= 4
+
+## BLOCK ON MAP
+
+def check_forward_block(env) -> BlockType:
+    state: EnvState = env.saved_state
+    pos = state.player_position + DIRECTIONS[state.player_direction]
+    return BlockType(state.map[state.player_level][pos[0], pos[1]])
