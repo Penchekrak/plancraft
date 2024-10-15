@@ -1,5 +1,5 @@
 from craftax.craftax.constants import Action
-from .executor import executor
+from src.environment.executor import executor
 
 
 def act_DO(env):

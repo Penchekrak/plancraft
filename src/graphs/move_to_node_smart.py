@@ -5,8 +5,8 @@ import networkx as nx
 from craftax.craftax.constants import DIRECTIONS, BlockType, Action
 from craftax.craftax.craftax_state import EnvState
 
-from .utils import get_obs_mask, is_in_obs
-from .executor import executor
+from .move_utils import get_obs_mask, is_in_obs, to_node
+from src.environment.executor import executor
 
 DIRECTIONS_TO_ACTIONS = {
     (0, 0): Action.NOOP,
@@ -15,9 +15,6 @@ DIRECTIONS_TO_ACTIONS = {
     (-1, 0): Action.UP,
     (1, 0): Action.DOWN
 }
-
-def to_node(pos: jax.numpy.ndarray):
-    return pos[0].item(), pos[1].item()
 
 INF_WEIGHT = 10 ** 6
 BLOCK_WEIGHT = {
@@ -82,8 +79,8 @@ NEED_PLACE = [
 ]
 
 def gen_graph_smart(state: EnvState,
-                    can_dig=False,
-                    can_place=False) -> nx.DiGraph:
+                    can_dig=0,
+                    can_place=0) -> nx.DiGraph:
     mask = get_obs_mask(state)
     start_pos = state.player_position
     level = state.player_level
@@ -93,10 +90,7 @@ def gen_graph_smart(state: EnvState,
 
     q = Queue()
     q.put(start_pos)
-    # for y_offset in range(-OBS_DIM[0] // 2, OBS_DIM[0] // 2 + 1):
-    #     for x_offset in range(-OBS_DIM[1] // 2, OBS_DIM[1] // 2 + 1):
     while not q.empty():
-        # cur_pos = start_pos + jax.numpy.array([y_offset, x_offset])
         cur_pos = q.get()
         cur_node = to_node(cur_pos)
 

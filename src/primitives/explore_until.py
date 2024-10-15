@@ -4,16 +4,20 @@ import typing
 import jax
 from craftax.craftax.constants import BlockType
 
-from .explore import explore_choose_node
-from .move_to_node_smart import gen_graph_smart, move_to_pos
-from .utils import find_block_any
+from primitives.checks import check_inventory_stone
+from src.graphs.move_utils import explore_choose_node
+from src.graphs.move_to_node_smart import gen_graph_smart, move_to_pos
+from src.graphs.move_utils import find_block_any
 from functools import partial
 
 logger = logging.getLogger()
 
 def explore_until(env, callback: BlockType | typing.Callable[[typing.Any], bool],
-                  max_iter = 25, can_dig=False, can_place=False, prev_pos: jax.numpy.ndarray | None = None):
+                  max_iter = 25, prev_pos: jax.numpy.ndarray | None = None):
     logger.info(f'exploring...')
+
+    can_dig = env.saved_state.inventory.pickaxe
+    can_place = check_inventory_stone(env)
 
     if isinstance(callback, BlockType):
         callback_fn = partial(block_in_obs_callback, block_type=callback)

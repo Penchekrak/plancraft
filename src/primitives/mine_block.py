@@ -2,18 +2,23 @@ import logging
 
 from craftax.craftax.constants import BlockType
 
+from src.graphs.move_to_node_smart import move_to_pos
+from src.graphs.move_utils import find_block_all
+from .checks import check_inventory_stone
 from .explore_until import explore_until
-from .move_to_node_smart import move_to_pos
 from .simple_actions import act_DO
-from .utils import find_block_all
 
 logger = logging.getLogger()
 
-def mine_block(env, block_type: BlockType, count: int = 1, max_iter = 25, can_dig=False, can_place=False):
+def mine_block(env, block_type: BlockType, count: int = 1, max_iter = 25):
     logger.info(f'mining {count } of {block_type}...')
+
+    can_dig = env.saved_state.inventory.pickaxe
+    can_place = check_inventory_stone(env)
+
     for block_iteration in range(count):
         logger.debug(f'iteration {block_iteration}/{count} of find_block...')
-        explore_until(env, callback=block_type, max_iter=max_iter, can_dig=can_dig, can_place=can_place)
+        explore_until(env, callback=block_type, max_iter=max_iter)
 
         targets = find_block_all(env.saved_state, block_type)
         if len(targets) == 0: continue
