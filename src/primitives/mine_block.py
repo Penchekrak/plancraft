@@ -4,9 +4,9 @@ from craftax.craftax.constants import BlockType
 
 from src.graphs.move_to_node_smart import move_to_pos
 from src.graphs.move_utils import find_block_all
-from .checks import check_inventory_stone
-from .explore_until import explore_until
-from .simple_actions import act_DO
+from src.primitives.checks import check_inventory_stone
+from src.primitives.explore_until import explore_until
+from src.primitives.simple_actions import act_DO
 
 logger = logging.getLogger()
 

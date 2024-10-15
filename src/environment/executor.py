@@ -1,7 +1,7 @@
 from craftax.craftax.constants import Action
 import os
 
-from .wrapper import SaveStateWrapper
+from src.environment.wrapper import SaveStateWrapper
 import logging
 
 logger = logging.getLogger("Executor")

@@ -16,9 +16,7 @@ from craftax.craftax.constants import BlockType
 from craftax.craftax_env import make_craftax_env_from_name
 import craftax.craftax.renderer as renderer
 
-from src.graphs.move_utils import explore_choose_node, find_block_any, find_block_all
 from src.environment.gifs import visual_testing
-from src.graphs.move_to_node_smart import gen_graph_smart, move_to_pos
 from src.environment.wrapper import SaveStateWrapper
 
 SEED = 0xBAD_5EED_B00B5

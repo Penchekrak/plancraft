@@ -5,7 +5,7 @@ import networkx as nx
 from craftax.craftax.constants import DIRECTIONS, BlockType, Action
 from craftax.craftax.craftax_state import EnvState
 
-from .move_utils import get_obs_mask, is_in_obs, to_node
+from src.graphs.move_utils import get_obs_mask, is_in_obs, to_node
 from src.environment.executor import executor
 
 DIRECTIONS_TO_ACTIONS = {

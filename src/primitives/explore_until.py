@@ -4,7 +4,7 @@ import typing
 import jax
 from craftax.craftax.constants import BlockType
 
-from primitives.checks import check_inventory_stone
+from src.primitives.checks import check_inventory_stone
 from src.graphs.move_utils import explore_choose_node
 from src.graphs.move_to_node_smart import gen_graph_smart, move_to_pos
 from src.graphs.move_utils import find_block_any
