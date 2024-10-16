@@ -1,8 +1,9 @@
 import importlib
 import sys
 import os
-from pydantic import NonPositiveFloat
 import time
+
+from src.environment.code_parser import find_most_function_calls
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
@@ -75,12 +76,10 @@ if __name__ == '__main__':
 
     history = []
     result, error_feedback = None, None
+    present_symbols = {}
 
     for i in range(5):
         if i >= 1:
-            print(f'{func_name=}')
-            # old_symbols.difference({func_name})
-
             env.reset()
             history.extend([
                 {
@@ -102,17 +101,18 @@ if __name__ == '__main__':
         print("-" * 100)
 
         # exec('print(1337)')
-        # TODO: make normal function execution because now it can crash if there were several
-        #  functions in the generated answer
         old_symbols = set(locals().keys()).union(set(globals().keys())).union({'old_symbols'})
         print(f"{old_symbols=}")
-        exec(code)
+        exec(code)  # define all generated functions
         new_symbols = set(locals().keys()).union(set(globals().keys())).difference(old_symbols)
         print(f"{new_symbols=}")
 
         try:
-            eval((func_name := next(iter(new_symbols))) + '(env)')
-            exec(f"del {func_name}")
+            # eval((func_name := next(iter(new_symbols))) + '(env)')
+            func_name, _ = find_most_function_calls(code, new_symbols)
+            exec(f'{func_name}(env)')
+            exec(f"for name in new_symbols: del name")
+
         except Exception as e:
             error_feedback = e
             logger.info(error_feedback)
