@@ -1,0 +1,399 @@
+Here are some useful programs written with Python and JAX.
+Please, when writing your own functions DO NOT use env variable directly, generate a list of actions to do with following functions, and then pass it to the executor.
+
+def act_DO(env):
+    action = Action.DO
+    executor(env, [action])
+
+def act_PLACE_STONE(env):
+    action = Action.PLACE_STONE
+    executor(env, [action])
+
+def act_PLACE_TABLE(env):
+    action = Action.PLACE_TABLE
+    executor(env, [action])
+
+def act_PLACE_FURNACE(env):
+    action = Action.PLACE_FURNACE
+    executor(env, [action])
+
+def act_PLACE_PLANT(env):
+    action = Action.PLACE_PLANT
+    executor(env, [action])
+
+def act_MAKE_WOOD_PICKAXE(env):
+    action = Action.MAKE_WOOD_PICKAXE
+    executor(env, [action])
+
+def act_MAKE_STONE_PICKAXE(env):
+    action = Action.MAKE_STONE_PICKAXE
+    executor(env, [action])
+
+def act_MAKE_IRON_PICKAXE(env):
+    action = Action.MAKE_IRON_PICKAXE
+    executor(env, [action])
+
+def act_MAKE_WOOD_SWORD(env):
+    action = Action.MAKE_WOOD_SWORD
+    executor(env, [action])
+
+def act_MAKE_STONE_SWORD(env):
+    action = Action.MAKE_STONE_SWORD
+    executor(env, [action])
+
+def act_MAKE_IRON_SWORD(env):
+    action = Action.MAKE_IRON_SWORD
+    executor(env, [action])
+
+def act_MAKE_DIAMOND_PICKAXE(env):
+    action = Action.MAKE_DIAMOND_PICKAXE
+    executor(env, [action])
+
+def act_MAKE_DIAMOND_SWORD(env):
+    action = Action.MAKE_DIAMOND_SWORD
+    executor(env, [action])
+
+def act_MAKE_IRON_ARMOUR(env):
+    action = Action.MAKE_IRON_ARMOUR
+    executor(env, [action])
+
+def act_MAKE_DIAMOND_ARMOUR(env):
+    action = Action.MAKE_DIAMOND_ARMOUR
+    executor(env, [action])
+
+## ITEMS
+
+def check_inventory_wood(env):
+    """Returns the number of wood in the inventory."""
+
+def check_inventory_stone(env):
+    """Returns the number of stone in the inventory."""
+
+def check_inventory_coal(env):
+    """Returns the number of coal in the inventory."""
+
+def check_inventory_iron(env):
+    """Returns the number of iron in the inventory."""
+
+def check_inventory_diamond(env):
+    """Returns the number of diamonds in the inventory."""
+
+def check_inventory_sapling(env):
+    """Returns the number of saplings in the inventory."""
+
+def check_inventory_bow(env):
+    """Returns the number of bows in the inventory."""
+
+def check_inventory_arrows(env):
+    """Returns the number of arrows in the inventory."""
+
+def check_inventory_torches(env):
+    """Returns the number of torches in the inventory."""
+
+def check_inventory_ruby(env):
+    """Returns the number of rubies in the inventory."""
+
+def check_inventory_sapphire(env):
+    """Returns the number of sapphires in the inventory."""
+
+def check_inventory_books(env):
+    """Returns the number of books in the inventory."""
+
+## PICKAXES
+
+def check_inventory_wood_pickaxe(env) -> bool:
+    """Returns True if the player has a wood pickaxe or better in the inventory, False otherwise."""
+
+def check_inventory_stone_pickaxe(env) -> bool:
+    """Returns True if the player has a stone pickaxe or better in the inventory, False otherwise."""
+
+def check_inventory_iron_pickaxe(env) -> bool:
+    """Returns True if the player has a iron pickaxe or better in the inventory, False otherwise."""
+
+def check_inventory_diamond_pickaxe(env) -> bool:
+    """Returns True if the player has a diamond pickaxe or better in the inventory, False otherwise."""
+
+## SWORDS
+
+def check_inventory_wood_sword(env) -> bool:
+    """Returns True if the player has a wood sword or better in the inventory, False otherwise."""
+
+def check_inventory_stone_sword(env) -> bool:
+    """Returns True if the player has a stone sword or better in the inventory, False otherwise."""
+
+def check_inventory_iron_sword(env) -> bool:
+    """Returns True if the player has a iron sword or better in the inventory, False otherwise."""
+
+def check_inventory_diamond_sword(env) -> bool:
+    """Returns True if the player has a diamond sword or better in the inventory, False otherwise."""
+
+## BLOCK ON MAP
+
+def check_forward_block(env) -> BlockType:
+    “””Returns the block type in front of the player”””
+
+
+def mine_block(env, block_type: BlockType, count: int = 1, max_iter: int = 25):
+"""
+Mines or crafts a specified number of blocks of a given type within an environment.
+Parameters:
+env : object
+The environment in which block mining and crafting occur.
+block_type : BlockType
+The type of block to be mined (e.g., ‘BlockType.STONE’). Must match available resources in the environment.
+count : int, optional
+The number of blocks to mine or craft. The function continues mining until the specified number is reached (default is 1).
+max_iter : int, optional The maximum number of iterations the function will attempt before stopping (default is 25).
+
+Returns: int Returns the number of blocks that were successfully mined or crafted.
+
+Note: The function includes `explore_until`, so it should not be called separately before this function.
+ """
+
+@@@@@@@@
+
+There are only these types of resources (BlockType arguments):
+INVALID
+OUT_OF_BOUNDS
+GRASS
+WATER
+STONE
+TREE
+WOOD
+PATH
+COAL
+IRON
+DIAMOND
+CRAFTING_TABLE
+FURNACE
+SAND
+LAVA
+PLANT
+RIPE_PLANT
+WALL
+DARKNESS
+WALL_MOSS
+STALAGMITE
+SAPPHIRE
+RUBY
+CHEST
+FOUNTAIN
+FIRE_GRASS
+ICE_GRASS
+GRAVEL
+FIRE_TREE
+ICE_SHRUB
+ENCHANTMENT_TABLE_FIRE
+ENCHANTMENT_TABLE_ICE
+NECROMANCER
+GRAVE
+GRAVE2
+GRAVE3
+NECROMANCER_VULNERABLE
+
+
+In order to plan your actions in a meaningful way I will provide you with dependencies for crafting items. They are go in the order of right crafting:
+{
+  "items": {
+    "crafting_table": {
+      "materials": {
+        "wood": 2
+      },
+      "requires": [],
+      "level": 1
+    },
+    "furnace": {
+      "materials": {
+        "stone": 2
+      },
+      "requires": [],
+      "level": 1
+    },
+    "wood_pickaxe": {
+      "materials": {
+        "wood": 1
+      },
+      "requires": ["crafting_table"],
+      "level": 1
+    },
+    "stone_pickaxe": {
+      "materials": {
+        "wood": 1,
+        "stone": 1
+      },
+      "requires": ["crafting_table"],
+      "level": 2
+    },
+    "iron_pickaxe": {
+      "materials": {
+        "wood": 1,
+        "stone": 1,
+        "coal": 1,
+        "iron": 1
+      },
+      "requires": ["crafting_table", "furnace"],
+      "level": 3
+    },
+    "diamond_pickaxe": {
+      "materials": {
+        "wood": 1,
+        "diamond": 3
+      },
+      "requires": ["crafting_table"],
+      "level": 4
+    },
+    "wood_sword": {
+      "materials": {
+        "wood": 1
+      },
+      "requires": ["crafting_table"],
+      "level": 1
+    },
+    "stone_sword": {
+      "materials": {
+        "wood": 1,
+        "stone": 1
+      },
+      "requires": ["crafting_table"],
+      "level": 2
+    },
+    "iron_sword": {
+      "materials": {
+        "wood": 1,
+        "stone": 1,
+        "coal": 1,
+        "iron": 1
+      },
+      "requires": ["crafting_table", "furnace"],
+      "level": 3
+    },
+    "diamond_sword": {
+      "materials": {
+        "wood": 1,
+        "diamond": 2
+      },
+      "requires": ["crafting_table"],
+      "level": 4
+    },
+    "iron_armour": {
+      "materials": {
+        "iron": 3,
+        "coal": 3
+      },
+      "requires": ["crafting_table", "furnace"],
+      "level": 1
+    },
+    "diamond_armour": {
+      "materials": {
+        "diamond": 3
+      },
+      "requires": ["crafting_table"],
+      "level": 2
+    },
+    "arrow": {
+      "materials": {
+        "wood": 1,
+        "stone": 1
+      },
+      "requires": ["crafting_table"],
+      "quantity": 2
+    },
+    "torch": {
+      "materials": {
+        "wood": 1,
+        "coal": 1
+      },
+      "requires": ["crafting_table"],
+      "quantity": 4
+    }
+  }
+}
+Note that there are requirements for many of the items above. For example, in order to obtain a stone you need to craft a wood pickaxe and so on for all other resources.
+
+
+
+At each round of conversation, I will give you
+Execution error: …
+Chat log: ...
+Level (depth-wise): …
+Nearby blocks: …
+Health: …
+Hunger: …
+Water: …
+Energy: …
+Position: …
+Equipment: …
+Task: …
+Critique: …
+
+You should then respond to me with
+Explain (if applicable): Are there any steps missing in your plan? Why does the code not complete the task? What does the chat log and execution error imply?
+Plan: How to complete the task step by step. You should pay attention to Inventory since it tells what you have. The task completeness check is also based on your final inventory.
+Code:
+    1) Write a SINGLE function taking the env as the only argument.
+    2) Do not forget to check that you have all necessary equipment (materials or tools) before crafting something using functions like check_inventory_wood(env)’.
+    3) Reuse the above useful programs as much as possible
+        - Use `mine_block(env, block_type: BlockType, count: int = 1, max_iter: int = 25)` to collect blocks. Do not use `executor(env, [action])` directly.
+
+    4) Your function will be reused for building more complex functions. Therefore, you should make it generic and reusable. You should not make strong assumption about the inventory (as it may be changed at a later time), and therefore you should always check whether you have the required items before using them. If not, you should first collect the required items and reuse the above useful programs. Also, make sure before crafting anything that you have a crafting table nearby you.
+    5) Functions in the "Code from the last round" section will not be saved or executed. Do not reuse functions listed there.
+    6) Anything defined outside a function will be ignored, define all your variables inside your functions.
+    7) Do not write infinite loops or recursive functions.
+    8) Name your function in a meaningful way (can infer the task from the name).
+
+You should only respond in the format as described below:
+RESPONSE FORMAT:
+
+Explain:
+Plan:
+1) ...
+2) ...
+3) ...
+...
+Code:
+
+```python
+# helper functions (only if needed, try to avoid them)
+# ...
+
+# main function after the helper functions
+def your_main_function_name(env):
+    # ...
+    pass
+```
+
+Examples:
+
+Task: create stone pickaxe
+
+Your possible answer:
+
+Explain: we need wood for crafting wood pickaxe. So, we need to ensure that we have enough wood in order to do that. If we have enough wood, then we can craft it immediately, but first we need to place a crafting table in front of us. Otherwise, we want to obtain wood via mine_block function, and then repeat all the steps discussed above.
+
+
+Plan:
+1) Check amount of wood in inventory
+2) Calculate needed amount of wood needed for crafting.
+3) If we do not have enough wood, mine until it is enough.
+4) Make sure that we can place a crafting table in front of us.
+5) Place a crafting table in front of us.
+6) Craft wood pickaxe.
+
+Code:
+
+```python
+def create_wood_pickaxe(env):
+    # check how many wood we have in inventory
+    wood = check_inventory_wood(env)
+    # ensure that we have enough wood in inventory
+    # because we also need wood for craft table
+    # we then want to obtain 1 + 2 wood
+    required_wood = 3
+    if wood < required_wood:
+        mine_block(env, BlockType.TREE, required_wood - wood)
+    # place a crafting table in front of us
+    act_PLACE_TABLE(env)
+    # craft wood pickaxe
+    act_MAKE_WOOD_PICKAXE(env)
+
+```

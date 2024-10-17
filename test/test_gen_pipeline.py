@@ -3,7 +3,6 @@ import sys
 import os
 import time
 
-
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
 llm_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'llm')
@@ -34,6 +33,7 @@ import ast
 SEED = 0xBAD_5EED_B00B5
 TASK = 'Create iron sword'
 TASK_CHECKER = {'Create iron sword': check_inventory_iron_sword}
+SPLIT_SYMBOL = '@@@@@@@@'
 
 if __name__ == '__main__':
     # def main():
@@ -52,6 +52,7 @@ if __name__ == '__main__':
 
     with open(f'{llm_dir}/prompt.txt', 'r') as file:
         content_prompt = file.read()
+        content_prompt_1, content_prompt_2 = content_prompt.split(SPLIT_SYMBOL)
 
     # #do some stuff
     stat_dict, inventory_values, blocks_dict = parse_state(state)
@@ -61,10 +62,9 @@ if __name__ == '__main__':
     system_prompt = """You are a helpful assistant that writes python code to
         complete any Craftax task specified by me."""
 
-    debug_prompt = """
-        The code you provided in the previous answer has some logical errors. Above, I list all achievements and inventory that were obtained from the execution of this generated code:
-        Inventory: {}
-        Achievements: {} 
+    debug_prompt = """The code you provided in the previous answer has some logical errors. Above, I list all 
+    achievements and inventory that were obtained from the execution of this generated code: Inventory: {} 
+    Achievements: {}
 
         But you need to fix or rewrite this code in order to achieve the given task: {}
         """
@@ -129,8 +129,12 @@ if __name__ == '__main__':
         os.remove(log_dir + f'/actions.txt')
 
         if result := TASK_CHECKER[TASK](env):
-            with open(f'{llm_dir}/{TASK}.py', 'w+'):
-                print(code, file=f)
+            f = open(f'{llm_dir}/code_gen.py', 'a+')
+            print(code, file=f)
+
+            content_prompt = content_prompt_1 + "\n" + f + "\n" + content_prompt_2 + "\n" + SPLIT_SYMBOL
+            f.close()
+
             break
 
         logger.info(result)
