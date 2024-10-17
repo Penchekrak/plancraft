@@ -26,7 +26,7 @@ class SaveStateWrapper(Wrapper):
         self.action_count += 1
         return obs, state, reward, done, info
 
-    def __init__(self, env, seed, log_dir, max_steps=400):
+    def __init__(self, env, seed, log_dir, max_steps=100):
         super().__init__(env)
         self.env = env
         self.seed = seed

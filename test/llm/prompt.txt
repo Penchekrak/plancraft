@@ -286,6 +286,9 @@ Code:
     6) Anything defined outside a function will be ignored, define all your variables inside your functions.
     7) Do not write infinite loops or recursive functions.
     8) Name your function in a meaningful way (can infer the task from the name).
+    9) Remember that to mine stone you have to have wooden pickaxe
+    10) To mine coal you have to have stone pickaxe
+    11) To mine iron you have to have stone pickaxe.
 
 You should only respond in the format as described below:
 RESPONSE FORMAT:
