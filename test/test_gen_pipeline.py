@@ -87,7 +87,7 @@ def exec_code(code, env):
     new_symbols = {}
     exec(code, globals(), new_symbols)  # define all generated functions
     # new_symbols = set(locals().keys()).union(set(globals().keys())).difference(old_symbols)
-    # print(f"{new_symbols=}")
+    print(f"{new_symbols=}")
 
     func_name, _ = find_most_function_calls(code, set(new_symbols.keys()))
     exec(f"{func_name}(env)", globals(), locals() | new_symbols)
@@ -192,7 +192,7 @@ def main(env, gen_idx):
 
 
 if __name__ == '__main__':
-    importlib.reload(renderer)
+    # importlib.reload(renderer)
     env = make_craftax_env_from_name("Craftax-Symbolic-v1", auto_reset=False)
     env = SaveStateWrapper(env, seed=SEED_, log_dir=log_dir)
     obs, state = env.reset(seed=SEED_)

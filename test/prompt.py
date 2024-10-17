@@ -73,7 +73,7 @@ def info2prompt(task, stat_dict, blocks_dict, inventory, last_result='', last_er
 
 
 def gen_code(system_prompt, content_prompt, history: list[dict], save=True) -> str:
-    groq_key = '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'
+    groq_key = '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'
     client = Groq(api_key=groq_key)
 
     mes = [
@@ -89,7 +89,7 @@ def gen_code(system_prompt, content_prompt, history: list[dict], save=True) -> s
     )
 
     gen_ans = response.choices[0].message.content
-    code = re.split('```python\n|```', gen_ans)[1]
+    code = '\n' + re.split('```python\n|```', gen_ans)[1]
 
     if not valid(code):
         raise ValueError(f'Invalid code: {code}')
