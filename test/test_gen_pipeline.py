@@ -70,7 +70,7 @@ TASK_CHECKER = {TASKS[ID]: CHECKERS[ID]}
 SPLIT_SYMBOL = '@@@@@@@@'
 N_GENS = 3
 N_REPLANS = 3
-SEED_ = 0xBAD_5EED_B00B5 + 42 - 1
+SEED_ = 0xBAD_5EED_B00B5 + 45
 N_SEEDS = 1
 SEEDS = [SEED_ + i for i in range(1, N_SEEDS + 1)]
 
@@ -92,8 +92,8 @@ def exec_code(code, env):
     func_name, _ = find_most_function_calls(code, set(new_symbols.keys()))
     exec(f"{func_name}(env)", globals(), locals() | new_symbols)
 
-    for func in new_symbols:
-        del locals()[func]
+    # for func in new_symbols:
+    #     del locals()[func]
 
 
 
@@ -134,14 +134,14 @@ def main(SEED, gen_idx):
 
     history = []
     result, error_feedback = None, None
-
+    ans = None
     for i in tqdm(range(N_REPLANS), desc='Replaning...'):
         if i >= 1:
             env.reset(seed=SEED)
             history.extend([
                 {
                     'role': 'assistant',
-                    'content': ans
+                    'content': ans or ""
                 },
                 {
                     'role': 'user',
@@ -183,10 +183,10 @@ def main(SEED, gen_idx):
             with open(log_dir + f'/{TASK}_{gen_idx}_actions_len.txt', 'a+') as f:
                 f.write(f'{actions_length}\n')
 
+            print(f"{result=}")
             break
 
 
-        print(f"{result=}")
         logger.info('%' * 25)
         time.sleep(7)
 

@@ -64,7 +64,7 @@ def visual_testing(random_seed: int, file_path: str, path_to_save: str, num_trie
                    gif_name="grid_output.gif"):
     """Tests a function in the environment and generates a GIF grid from the steps."""
     all_gif_arrays = []
-
+    print('started visual testing')
     img_array = []
     try:
         obs, state = env.reset(env.default_params, seed=random_seed)

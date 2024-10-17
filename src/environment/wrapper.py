@@ -4,9 +4,7 @@ from gym import Wrapper
 
 class SaveStateWrapper(Wrapper):
     def reset(self, *args, seed = None, **kwargs):
-        if seed is not None:
-            self.seed = seed
-        self.rng = jax.random.PRNGKey(self.seed)
+        self.rng = jax.random.PRNGKey(seed)
         obs, state = self.env.reset(self.rng)
         self.saved_state = state
         return obs, state
