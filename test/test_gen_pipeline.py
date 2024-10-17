@@ -3,12 +3,13 @@ import sys
 import os
 import time
 
-from src.environment.code_parser import find_most_function_calls
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
 llm_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'llm')
 os.makedirs(log_dir, exist_ok=True)
+
+from src.environment.code_parser import find_most_function_calls
 
 from src.primitives.simple_actions import act_PLACE_TABLE, act_MAKE_WOOD_PICKAXE, act_DO, act_PLACE_FURNACE, \
     act_MAKE_IRON_SWORD, act_MAKE_STONE_PICKAXE, act_MAKE_WOOD_SWORD, act_MAKE_STONE_SWORD, act_MAKE_IRON_PICKAXE
@@ -110,8 +111,8 @@ if __name__ == '__main__':
         try:
             # eval((func_name := next(iter(new_symbols))) + '(env)')
             func_name, _ = find_most_function_calls(code, new_symbols)
-            exec(f'{func_name}(env)')
-            exec(f"for name in new_symbols: del name")
+            for func in new_symbols:
+                del locals()[func]
 
         except Exception as e:
             error_feedback = e
