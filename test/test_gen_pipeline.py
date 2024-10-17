@@ -70,7 +70,7 @@ TASK_CHECKER = {TASKS[ID]: CHECKERS[ID]}
 SPLIT_SYMBOL = '@@@@@@@@'
 N_GENS = 3
 N_REPLANS = 3
-SEED_ = 0xBAD_5EED_B00B5 + 42
+SEED_ = 0xBAD_5EED_B00B5 + 42 - 1
 N_SEEDS = 1
 SEEDS = [SEED_ + i for i in range(1, N_SEEDS + 1)]
 
@@ -82,14 +82,15 @@ logger.addHandler(handler)
 
 
 def exec_code(code, env):
-    old_symbols = set(locals().keys()).union(set(globals().keys())).union({'old_symbols'})
-    print(f"{old_symbols=}")
-    exec(code)  # define all generated functions
-    new_symbols = set(locals().keys()).union(set(globals().keys())).difference(old_symbols)
-    print(f"{new_symbols=}")
+    # old_symbols = set(locals().keys()).union(set(globals().keys())).union({'old_symbols'})
+    # print(f"{old_symbols=}")
+    new_symbols = {}
+    exec(code, globals(), new_symbols)  # define all generated functions
+    # new_symbols = set(locals().keys()).union(set(globals().keys())).difference(old_symbols)
+    # print(f"{new_symbols=}")
 
-    func_name, _ = find_most_function_calls(code, new_symbols)
-    exec(f"{func_name}(env)")
+    func_name, _ = find_most_function_calls(code, set(new_symbols.keys()))
+    exec(f"{func_name}(env)", globals(), locals() | new_symbols)
 
     for func in new_symbols:
         del locals()[func]
