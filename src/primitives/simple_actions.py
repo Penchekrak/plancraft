@@ -1,5 +1,4 @@
 import logging
-from turtledemo.sorting_animate import Block
 
 from craftax.craftax.constants import Action, BlockType, DIRECTIONS
 from src.environment.executor import check_nearby_table, check_nearby_furnace

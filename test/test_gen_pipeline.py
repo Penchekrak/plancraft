@@ -102,14 +102,13 @@ def main(SEED, gen_idx):
     importlib.reload(renderer)
     env = make_craftax_env_from_name("Craftax-Symbolic-v1", auto_reset=False)
     env = SaveStateWrapper(env, seed=SEED, log_dir=log_dir)
-    obs, state = env.reset()
+    obs, state = env.reset(seed=SEED)
 
     with open(log_dir + '/actions.txt', 'w') as f:
         pass
 
     with open(f'{llm_dir}/prompt.txt', 'r') as file:
         content_prompt = file.read()
-        content_prompt_1, content_prompt_2 = content_prompt.split(SPLIT_SYMBOL)
 
     # #do some stuff
     stat_dict, inventory_values, blocks_dict = parse_state(state)
@@ -137,7 +136,7 @@ def main(SEED, gen_idx):
 
     for i in tqdm(range(N_REPLANS), desc='Replaning...'):
         if i >= 1:
-            env.reset()
+            env.reset(seed=SEED)
             history.extend([
                 {
                     'role': 'assistant',
@@ -153,18 +152,7 @@ def main(SEED, gen_idx):
             )
 
         try:
-            # ans, code = gen_code(system_prompt, content_prompt, history, save=True)
-            code = '''
-def collect_wood(env):
-    # check how many wood we have in inventory
-    wood = check_inventory_wood(env)
-    # we want to obtain at least 1 wood
-    required_wood = 1
-    if wood < required_wood:
-        # mine BlockType.TREE until we have enough wood
-        wood_needed = required_wood - wood
-        mine_block(env, BlockType.TREE, wood_needed, max_iter=50)
-        '''
+            ans, code = gen_code(system_prompt, content_prompt, history, save=True)
             print("-" * 100)
             print(code)
             print("-" * 100)
@@ -208,7 +196,7 @@ if __name__ == '__main__':
     importlib.reload(renderer)
     env = make_craftax_env_from_name("Craftax-Symbolic-v1", auto_reset=False)
     env = SaveStateWrapper(env, seed=SEED_, log_dir=log_dir)
-    obs, state = env.reset()
+    obs, state = env.reset(seed=SEED_)
 
     # main(SEED_)
     for idx in tqdm(range(N_GENS), desc='Generating...'):
