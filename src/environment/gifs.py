@@ -19,45 +19,24 @@ def process_environment_step(env: SaveStateWrapper, renderer, action, img_array)
 
 
 def create_gif_grid(gif_arrays, save_path, grid_size, file_name="grid_output.gif"):
-    """Creates a grid of GIFs and saves it as a single large GIF."""
-    num_gifs = len(gif_arrays)
-    rows, cols = grid_size
-    gif_length = max(len(gif) for gif in gif_arrays)  # Ensure all GIFs are the same length
-
-    # Get width and height from the first image in the first GIF
-    width, height = gif_arrays[0][0].size
-
-    # Create a blank grid image for each frame in the GIF
-    grid_frames = []
-    black_frame = Image.new("RGB", (width, height), (0, 0, 0))
-
-    for frame_idx in range(gif_length):
-        grid_image = Image.new("RGB", (cols * width, rows * height))
-
-        for gif_idx, gif in enumerate(gif_arrays):
-            row = gif_idx // cols
-            col = gif_idx % cols
-            if frame_idx < len(gif):
-                gif_frame = gif[frame_idx]
-            else:
-                gif_frame = black_frame  # gif[-1]  # If a GIF is shorter, make the black screen
-
-            # Paste the GIF frame into the grid
-            grid_image.paste(gif_frame, (col * width, row * height))
-
-        grid_frames.append(grid_image)
+    """Creates a video"""
+    def write_video(file_name, images, slide_time=5, FPS=10):
+        shape = images[0].size
+        fourcc = cv2.VideoWriter.fourcc(*'MJPG')
+        out = cv2.VideoWriter(file_name, fourcc, FPS, shape)
+    
+        for image in images:
+            cv_img = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+            for _ in range(slide_time * FPS):
+                cv_img = cv2.resize(image, shape)
+                out.write(cv_img)
+    
+        out.release()
 
     # Save the grid as a GIF
     gif_save_path = f"{save_path}"
     os.makedirs(gif_save_path, exist_ok=True)
-
-    grid_frames[0].save(
-        os.path.join(gif_save_path, file_name),
-        save_all=True,
-        append_images=grid_frames[1:],
-        loop=0,
-        duration=200
-    )
+    write_video(os.path.join(gif_save_path, file_name), gif_arrays[0])
 
 
 def visual_testing(env, file_path: str, path_to_save: str, num_tries, renderer, grid_size=(2, 2),
@@ -100,4 +79,4 @@ def visual_testing(env, file_path: str, path_to_save: str, num_tries, renderer, 
 
     # Generate the grid of GIFs
     # print(path_to_save)
-    create_gif_grid([env.images], path_to_save, grid_size, gif_name)
+    create_gif_grid([env.images], path_to_save.replace('.gif', '.mp4'), grid_size, gif_name)
