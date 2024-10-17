@@ -269,3 +269,5 @@ Code:
     9) Remember that to mine stone you have to have wooden pickaxe
     10) To mine coal you have to have stone pickaxe
     11) To mine iron you have to have stone pickaxe.
+
+

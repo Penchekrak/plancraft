@@ -93,7 +93,7 @@ class LLMCaller:
         return (self.get_basic_prompt() +
                 self.get_main_prompt() +
                 self.generate_observation_prompt(env) +
-                'Current task: ' + self.task +
+                'Current task: ' + self.task + '\n' * 3 +
                 self.get_response_format_prompt())
 
 

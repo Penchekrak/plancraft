@@ -201,3 +201,8 @@ if __name__ == '__main__':
     code = planner.get_plan(env)
     if code is not None:
         print('success rate: ', planner.estimate_success_rate(env, code))
+
+    with open('history.txt', 'w') as f:
+        for msg in planner.llm_caller.history:
+            f.write(msg['role'] + ': \n')
+            f.write(msg['content'] + '\n\n')
