@@ -31,41 +31,42 @@ import logging
 import ast
 
 SEED = 0xBAD_5EED_B00B5
+SEEDS = [SEED + i for i in range(10)]
 
-TASKS = [
-    'Collect wood',
-    # 'Place crafting table',
-    'Make wood pickaxe',
-    'Collect stone',
-    'Make stone pickaxe',
-    'Collect coal',
-    'Collect iron',
-    # 'Place furnace',
-    'Make iron pickaxe',
-    'Collect diamond'
-]
+# TASKS = [
+#     'Collect wood',
+#     # 'Place crafting table',
+#     'Make wood pickaxe',
+#     'Collect stone',
+#     'Make stone pickaxe',
+#     'Collect coal',
+#     'Collect iron',
+#     # 'Place furnace',
+#     'Make iron pickaxe',
+#     'Collect diamond'
+# ]
 
-CHECKERS = [
-    check_inventory_wood,
-    # ,
-    check_inventory_wood_pickaxe,
-    check_inventory_stone,
-    check_inventory_stone_pickaxe,
-    check_inventory_coal,
-    check_inventory_iron,
-    # ,
-    check_inventory_iron_pickaxe,
-    check_inventory_diamond
-]
+# CHECKERS = [
+#     check_inventory_wood,
+#     # ,
+#     check_inventory_wood_pickaxe,
+#     check_inventory_stone,
+#     check_inventory_stone_pickaxe,
+#     check_inventory_coal,
+#     check_inventory_iron,
+#     # ,
+#     check_inventory_iron_pickaxe,
+#     check_inventory_diamond
+# ]
 
-TASKS_CHECKERS = {TASKS[i]: CHECKERS[i] for i in range(len(TASKS))}
+# TASKS_CHECKERS = {TASKS[i]: CHECKERS[i] for i in range(len(TASKS))}
 
-
+TASK = 'Create iron sword'
 TASK_CHECKER = {'Create iron sword': check_inventory_iron_sword}
 SPLIT_SYMBOL = '@@@@@@@@'
 
 if __name__ == '__main__':
-    # def main():
+# def main():
     importlib.reload(renderer)
     env = make_craftax_env_from_name("Craftax-Symbolic-v1", auto_reset=False)
     env = SaveStateWrapper(env, seed=SEED, log_dir=log_dir)
@@ -169,3 +170,6 @@ if __name__ == '__main__':
         logger.info(result)
         logger.info('%' * 100)
         time.sleep(7)
+
+
+# if __name__ == '__main__':
