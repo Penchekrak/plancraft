@@ -3,6 +3,8 @@ import sys
 import os
 import time
 
+from tqdm import tqdm
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
 llm_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'llm')
@@ -30,8 +32,9 @@ from src.primitives.checks import *
 import logging
 import ast
 
-SEED_ = 0xBAD_5EED_B00B5
-SEEDS = [SEED_ + i for i in range(1, 11)]
+SEED_ = 0xBAD_5EED_B00B5 + 42
+N_SEEDS = 3
+SEEDS = [SEED_ + i for i in range(1, N_SEEDS + 1)]
 
 # TASKS = [
 #     'Collect wood',
@@ -61,11 +64,12 @@ SEEDS = [SEED_ + i for i in range(1, 11)]
 
 # TASKS_CHECKERS = {TASKS[i]: CHECKERS[i] for i in range(len(TASKS))}
 
-TASK = 'Create iron sword'
-TASK_CHECKER = {'Create iron sword': check_inventory_iron_sword}
+TASK = 'Create wood sword'
+TASK_CHECKER = {'Create wood sword': check_inventory_wood_sword}
 SPLIT_SYMBOL = '@@@@@@@@'
 N_GENS = 3
 N_REPLANS = 3
+
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger('main_logger')
@@ -75,10 +79,10 @@ logger.addHandler(handler)
 
 def exec_code(code, env):
     old_symbols = set(locals().keys()).union(set(globals().keys())).union({'old_symbols'})
-    print(f"{old_symbols=}")
+    # print(f"{old_symbols=}")
     exec(code)  # define all generated functions
     new_symbols = set(locals().keys()).union(set(globals().keys())).difference(old_symbols)
-    print(f"{new_symbols=}")
+    # print(f"{new_symbols=}")
 
     func_name, _ = find_most_function_calls(code, new_symbols)
     exec(f"{func_name}(env)")
@@ -88,7 +92,7 @@ def exec_code(code, env):
 
 
 # if __name__ == '__main__':
-def main(SEED):
+def main(SEED, gen_idx):
     importlib.reload(renderer)
     env = make_craftax_env_from_name("Craftax-Symbolic-v1", auto_reset=False)
     env = SaveStateWrapper(env, seed=SEED, log_dir=log_dir)
@@ -125,7 +129,7 @@ def main(SEED):
     history = []
     result, error_feedback = None, None
 
-    for i in range(N_REPLANS):
+    for i in tqdm(range(N_REPLANS), desc='Replaning...'):
         if i >= 1:
             env.reset()
             history.extend([
@@ -142,25 +146,22 @@ def main(SEED):
             ]
             )
 
-        ans, code = gen_code(system_prompt, content_prompt, history, save=True)
-        print("-" * 100)
-        print(code)
-        print("-" * 100)
-
         try:
+            ans, code = gen_code(system_prompt, content_prompt, history, save=True)
+
+            print("-" * 100)
+            print(code)
+            print("-" * 100)
+
             exec_code(code, env)
+
         except Exception as e:
             error_feedback = e
             logger.info(error_feedback)
             continue
 
         stat_dict, inventory_values, blocks_dict = parse_state(env.saved_state)
-
-        visual_testing(SEED, log_dir + f'/actions.txt', log_dir, 1, env, renderer,
-                       grid_size=(1, 1), gif_name=f'gif_{TASK}_{i}.gif')
-
-        # delete file actions.txt
-        os.remove(log_dir + f'/actions.txt')
+        print(f"repl_step: {i}")
 
         if result := TASK_CHECKER[TASK](env):
             # f = open(f'{llm_dir}/code_gen.py', 'a+')
@@ -169,26 +170,33 @@ def main(SEED):
             # content_prompt = content_prompt_1 + "\n" + f + "\n" + content_prompt_2 + "\n" + SPLIT_SYMBOL
             # f.close()
 
+            visual_testing(SEED, log_dir + f'/actions.txt', log_dir, 1, env, renderer,
+                           grid_size=(1, 1), gif_name=f'gif_{TASK}_{gen_idx}.gif')
+
             break
 
-        logger.info(result)
-        logger.info('%' * 100)
+        # delete file actions.txt
+        os.remove(log_dir + f'/actions.txt')
+
+        print(f"{result=}")
+        logger.info('%' * 25)
         time.sleep(7)
 
     return code, result
 
 
 if __name__ == '__main__':
-    sr = 0
     importlib.reload(renderer)
     env = make_craftax_env_from_name("Craftax-Symbolic-v1", auto_reset=False)
     env = SaveStateWrapper(env, seed=SEED_, log_dir=log_dir)
     obs, state = env.reset()
 
-    for _ in range(N_GENS):
-        code, result = main(SEED_)
+    # main(SEED_)
+    for _ in tqdm(range(N_GENS), desc='Generating...'):
+        sr = 0
+        code, result = main(SEED_, _)
 
-        for seed in SEEDS:
+        for seed in tqdm(SEEDS, desc='Seeding...'):
             env.reset(seed=seed)
 
             try:
@@ -198,11 +206,11 @@ if __name__ == '__main__':
                 logger.info(e)
                 result = 0
 
-            sr += result
+            sr += bool(result)
+
         sr /= len(SEEDS)
         print(f'Score: {sr}')
+
         f = open(f'{llm_dir}/code_gen_{_}_{round(sr, 2)}.py', 'w+')
         print(code, file=f)
         f.close()
-
-    print(f'Score: {sr / len(SEEDS)}')
