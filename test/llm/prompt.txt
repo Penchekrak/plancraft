@@ -150,6 +150,31 @@ Returns: int Returns the number of blocks that were successfully mined or crafte
 Note: The function includes `explore_until`, so it should not be called separately before this function.
  """
 
+def collect_wood(env):
+    # check how many wood we have in inventory
+    wood = check_inventory_wood(env)
+    # ensure that we have enough wood in inventory
+    # we want to obtain at least 1 wood
+    required_wood = 1
+    if wood < required_wood:
+        mine_block(env, BlockType.TREE, required_wood - wood)
+
+def create_wood_sword(env):
+    # check how many wood we have in inventory
+    wood = check_inventory_wood(env)
+    # ensure that we have enough wood in inventory
+    # we want to obtain 2 wood for crafting table
+    # AND 1 wood for crafting sword
+    required_wood = 3
+    if wood < required_wood:
+        mine_block(env, BlockType.TREE, required_wood - wood)
+    # place a crafting table in front of us
+    act_PLACE_TABLE(env)
+    # craft wood sword
+    act_MAKE_WOOD_SWORD(env)
+
+
+
 @@@@@@@@
 
 There are only these types of resources (BlockType arguments):
@@ -169,30 +194,9 @@ FURNACE
 SAND
 LAVA
 PLANT
-RIPE_PLANT
-WALL
-DARKNESS
-WALL_MOSS
-STALAGMITE
-SAPPHIRE
-RUBY
-CHEST
-FOUNTAIN
-FIRE_GRASS
-ICE_GRASS
-GRAVEL
-FIRE_TREE
-ICE_SHRUB
-ENCHANTMENT_TABLE_FIRE
-ENCHANTMENT_TABLE_ICE
-NECROMANCER
-GRAVE
-GRAVE2
-GRAVE3
-NECROMANCER_VULNERABLE
 
 
-In order to plan your actions in a meaningful way I will provide you with dependencies for crafting items. They are go in the order of right crafting:
+In order to plan your actions in a meaningful way I will provide you with dependencies for crafting items.
 {
   "items": {
     "crafting_table": {
@@ -274,42 +278,21 @@ In order to plan your actions in a meaningful way I will provide you with depend
       },
       "requires": ["crafting_table"],
       "level": 4
-    },
-    "iron_armour": {
-      "materials": {
-        "iron": 3,
-        "coal": 3
-      },
-      "requires": ["crafting_table", "furnace"],
-      "level": 1
-    },
-    "diamond_armour": {
-      "materials": {
-        "diamond": 3
-      },
-      "requires": ["crafting_table"],
-      "level": 2
-    },
-    "arrow": {
+    }
+}
+
+For example:
+
+ "stone_pickaxe": {
       "materials": {
         "wood": 1,
         "stone": 1
       },
       "requires": ["crafting_table"],
-      "quantity": 2
-    },
-    "torch": {
-      "materials": {
-        "wood": 1,
-        "coal": 1
-      },
-      "requires": ["crafting_table"],
-      "quantity": 4
+      "level": 2
     }
-  }
-}
-Note that there are requirements for many of the items above. For example, in order to obtain a stone you need to craft a wood pickaxe and so on for all other resources.
 
+– means that for crafting stone pickaxe you need to have a crafting table in front of you and 1 wood and 1 stone in your inventory. Level 2 here means that you need to craft a crafting table first, AND ONLY THEN craft stone pickaxe.
 
 
 At each round of conversation, I will give you
@@ -328,7 +311,7 @@ Critique: …
 
 You should then respond to me with
 Explain (if applicable): Are there any steps missing in your plan? Why does the code not complete the task? What does the chat log and execution error imply?
-Plan: How to complete the task step by step. You should pay attention to Inventory since it tells what you have. The task completeness check is also based on your final inventory.
+Plan: How to complete the task step by step. You should pay attention to Inventory since it tells what you have. The task completeness check is also based on your final inventory. While planning, make sure that you would be able to execute planned action: count resources needed, and manage it wisely.
 Code:
     1) Write a SINGLE function taking the env as the only argument.
     2) Do not forget to check that you have all necessary equipment (materials or tools) before crafting something using functions like check_inventory_wood(env)’.
@@ -364,16 +347,14 @@ def your_main_function_name(env):
 
 Examples:
 
-Task: create stone pickaxe
+Task: create wood pickaxe.
 
 Your possible answer:
 
-Explain: we need wood for crafting wood pickaxe. So, we need to ensure that we have enough wood in order to do that. If we have enough wood, then we can craft it immediately, but first we need to place a crafting table in front of us. Otherwise, we want to obtain wood via mine_block function, and then repeat all the steps discussed above.
-
-
+Explain: we need wood for crafting wood pickaxe. So, we need to ensure that we have enough wood in order to do that. First of all, we want to obtain enough wood for a crafting table. After that we want to get enough wood for a wooden sword. If we have enough wood for crafting a table AND crafting table in front of us, then we can craft it immediately.
 Plan:
 1) Check amount of wood in inventory
-2) Calculate needed amount of wood needed for crafting.
+2) Calculate the amount of wood needed for crafting a table AND sword.
 3) If we do not have enough wood, mine until it is enough.
 4) Make sure that we can place a crafting table in front of us.
 5) Place a crafting table in front of us.
@@ -386,8 +367,8 @@ def create_wood_pickaxe(env):
     # check how many wood we have in inventory
     wood = check_inventory_wood(env)
     # ensure that we have enough wood in inventory
-    # because we also need wood for craft table
-    # we then want to obtain 1 + 2 wood
+    # we want to obtain 2 wood for crafting table
+    # AND 1 wood for crafting pickaxe
     required_wood = 3
     if wood < required_wood:
         mine_block(env, BlockType.TREE, required_wood - wood)

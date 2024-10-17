@@ -32,43 +32,47 @@ from src.primitives.checks import *
 import logging
 import ast
 
-SEED_ = 0xBAD_5EED_B00B5 + 42
-N_SEEDS = 3
-SEEDS = [SEED_ + i for i in range(1, N_SEEDS + 1)]
+from src.epoch1.generated import *
 
-# TASKS = [
-#     'Collect wood',
-#     # 'Place crafting table',
-#     'Make wood pickaxe',
-#     'Collect stone',
-#     'Make stone pickaxe',
-#     'Collect coal',
-#     'Collect iron',
-#     # 'Place furnace',
-#     'Make iron pickaxe',
-#     'Collect diamond'
-# ]
 
-# CHECKERS = [
-#     check_inventory_wood,
-#     # ,
-#     check_inventory_wood_pickaxe,
-#     check_inventory_stone,
-#     check_inventory_stone_pickaxe,
-#     check_inventory_coal,
-#     check_inventory_iron,
-#     # ,
-#     check_inventory_iron_pickaxe,
-#     check_inventory_diamond
-# ]
+TASKS = [
+    'Collect wood',
+    # 'Place crafting table',
+    'Make wood pickaxe',
+    'Collect stone',
+    'Make stone pickaxe',
+    'Collect coal',
+    'Collect iron',
+    # 'Place furnace',
+    'Make iron pickaxe',
+    'Collect diamond'
+]
+
+CHECKERS = [
+    check_inventory_wood,
+    # ,
+    check_inventory_wood_pickaxe,
+    check_inventory_stone,
+    check_inventory_stone_pickaxe,
+    check_inventory_coal,
+    check_inventory_iron,
+    # ,
+    check_inventory_iron_pickaxe,
+    check_inventory_diamond
+]
 
 # TASKS_CHECKERS = {TASKS[i]: CHECKERS[i] for i in range(len(TASKS))}
 
-TASK = 'Create wood sword'
-TASK_CHECKER = {'Create wood sword': check_inventory_wood_sword}
+# TASK = 'Collect wood'
+ID = 0
+TASK = TASKS[ID]
+TASK_CHECKER = {TASKS[ID]: CHECKERS[ID]}
 SPLIT_SYMBOL = '@@@@@@@@'
 N_GENS = 3
 N_REPLANS = 3
+SEED_ = 0xBAD_5EED_B00B5 + 42
+N_SEEDS = 2
+SEEDS = [SEED_ + i for i in range(1, N_SEEDS + 1)]
 
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
@@ -79,16 +83,18 @@ logger.addHandler(handler)
 
 def exec_code(code, env):
     old_symbols = set(locals().keys()).union(set(globals().keys())).union({'old_symbols'})
-    # print(f"{old_symbols=}")
+    print(f"{old_symbols=}")
     exec(code)  # define all generated functions
     new_symbols = set(locals().keys()).union(set(globals().keys())).difference(old_symbols)
-    # print(f"{new_symbols=}")
+    print(f"{new_symbols=}")
 
     func_name, _ = find_most_function_calls(code, new_symbols)
     exec(f"{func_name}(env)")
 
     for func in new_symbols:
         del locals()[func]
+
+
 
 
 # if __name__ == '__main__':
@@ -147,8 +153,18 @@ def main(SEED, gen_idx):
             )
 
         try:
-            ans, code = gen_code(system_prompt, content_prompt, history, save=True)
-
+            # ans, code = gen_code(system_prompt, content_prompt, history, save=True)
+            code = '''
+def collect_wood(env):
+    # check how many wood we have in inventory
+    wood = check_inventory_wood(env)
+    # we want to obtain at least 1 wood
+    required_wood = 1
+    if wood < required_wood:
+        # mine BlockType.TREE until we have enough wood
+        wood_needed = required_wood - wood
+        mine_block(env, BlockType.TREE, wood_needed, max_iter=50)
+        '''
             print("-" * 100)
             print(code)
             print("-" * 100)
@@ -170,13 +186,16 @@ def main(SEED, gen_idx):
             # content_prompt = content_prompt_1 + "\n" + f + "\n" + content_prompt_2 + "\n" + SPLIT_SYMBOL
             # f.close()
 
-            visual_testing(SEED, log_dir + f'/actions.txt', log_dir, 1, env, renderer,
-                           grid_size=(1, 1), gif_name=f'gif_{TASK}_{gen_idx}.gif')
+            f = open(log_dir + '/actions.txt', 'r')
+            actions_length = len(f.read().split('\n'))
+            f.close()
+
+            # content_prompt = content_prompt_1 + "\n" + f + "\n" + content_prompt_2 + "\n" + SPLIT_SYMBOL
+            with open(log_dir + f'/{TASK}_{gen_idx}_actions_len.txt', 'a+') as f:
+                f.write(f'{actions_length}\n')
 
             break
 
-        # delete file actions.txt
-        os.remove(log_dir + f'/actions.txt')
 
         print(f"{result=}")
         logger.info('%' * 25)
@@ -192,9 +211,9 @@ if __name__ == '__main__':
     obs, state = env.reset()
 
     # main(SEED_)
-    for _ in tqdm(range(N_GENS), desc='Generating...'):
+    for idx in tqdm(range(N_GENS), desc='Generating...'):
         sr = 0
-        code, result = main(SEED_, _)
+        code, result = main(SEED_, idx)
 
         for seed in tqdm(SEEDS, desc='Seeding...'):
             env.reset(seed=seed)
@@ -202,6 +221,9 @@ if __name__ == '__main__':
             try:
                 exec_code(code, env)
                 result = TASK_CHECKER[TASK](env)
+                visual_testing(seed, log_dir + f'/actions.txt', log_dir, 1, env, renderer,
+                               grid_size=(1, 1), gif_name=f'gif_{TASK}_{idx}_{seed}_{result}.gif')
+                os.remove(log_dir + f'/actions.txt')
             except Exception as e:
                 logger.info(e)
                 result = 0
@@ -211,6 +233,8 @@ if __name__ == '__main__':
         sr /= len(SEEDS)
         print(f'Score: {sr}')
 
-        f = open(f'{llm_dir}/code_gen_{_}_{round(sr, 2)}.py', 'w+')
+        f = open(f'{llm_dir}/code_{TASK}_{idx}_{round(sr, 2)}.py', 'w+')
         print(code, file=f)
         f.close()
+
+
