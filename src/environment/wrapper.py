@@ -1,19 +1,26 @@
 import jax
+import numpy as np
 from gym import Wrapper
-
+import craftax.craftax.renderer as renderer
+from PIL import Image
 
 class SaveStateWrapper(Wrapper):
+    def render(self, state):
+        return Image.fromarray(np.array(renderer.render_craftax_pixels(state, 16), dtype=np.uint8))
+
     def reset(self, *args, seed = None, **kwargs):
         if seed is not None:
             self.seed = seed
         self.rng = jax.random.PRNGKey(self.seed)
         obs, state = self.env.reset(self.rng)
+        self.images = [self.render(state)]
         self.saved_state = state
         return obs, state
 
     def step(self, action):
         self.rng, subkey = jax.random.split(self.rng)
         obs, state, reward, done, info = self.env.step(subkey, self.saved_state, action.value, self.env.default_params)
+        self.images.append(self.render(state))
         self.saved_state = state
         return obs, state, reward, done, info
 

@@ -60,45 +60,44 @@ def create_gif_grid(gif_arrays, save_path, grid_size, file_name="grid_output.gif
     )
 
 
-def visual_testing(random_seed: int, file_path: str, path_to_save: str, num_tries, env, renderer, grid_size=(2, 2),
+def visual_testing(env, file_path: str, path_to_save: str, num_tries, renderer, grid_size=(2, 2),
                    gif_name="grid_output.gif"):
     """Tests a function in the environment and generates a GIF grid from the steps."""
-    all_gif_arrays = []
-    print('started visual testing')
-    img_array = []
-    try:
-        obs, state = env.reset(env.default_params, seed=random_seed)
-        done = False
-
-        # actions = function_to_test(state, **function_parameters)
-        if not os.path.exists(file_path):
-            raise ValueError(f"No such file in given path: {file_path}")
-
-        with open(file_path, 'r') as f:
-            actions = []
-            for line in f:
-                actions.append(Action(int(line.strip())))
-
-        # assert len(actions) != 0, 'No actions found for this test function'
-
-        i = 0
-        while not done:
-            # action = function_to_test(obs, **function_parameters)
-            obs, state, reward, done, info = process_environment_step(
-                env, renderer, actions[i], img_array
-            )
-
-            i += 1
-            if i >= len(actions):
-                done = True
-
-    except Exception as e:
-        print(f"Error during testing: {e}")
-        return
-
-    # Store each gif array to be used for grid creation later
-    all_gif_arrays.append(img_array)
+    # all_gif_arrays = []
+    # print('started visual testing')
+    # img_array = []
+    # try:
+    #     done = False
+    #
+    #     # actions = function_to_test(state, **function_parameters)
+    #     if not os.path.exists(file_path):
+    #         raise ValueError(f"No such file in given path: {file_path}")
+    #
+    #     with open(file_path, 'r') as f:
+    #         actions = []
+    #         for line in f:
+    #             actions.append(Action(int(line.strip())))
+    #
+    #     # assert len(actions) != 0, 'No actions found for this test function'
+    #
+    #     i = 0
+    #     while not done:
+    #         # action = function_to_test(obs, **function_parameters)
+    #         obs, state, reward, done, info = process_environment_step(
+    #             env, renderer, actions[i], img_array
+    #         )
+    #
+    #         i += 1
+    #         if i >= len(actions):
+    #             done = True
+    #
+    # except Exception as e:
+    #     print(f"Error during testing: {e}")
+    #     return
+    #
+    # # Store each gif array to be used for grid creation later
+    # all_gif_arrays.append(img_array)
 
     # Generate the grid of GIFs
     # print(path_to_save)
-    create_gif_grid(all_gif_arrays, path_to_save, grid_size, gif_name)
+    create_gif_grid([env.images], path_to_save, grid_size, gif_name)

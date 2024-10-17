@@ -308,4 +308,36 @@ def your_main_function_name(env):
     pass
 ```
 
+Examples:
 
+Task: create wood pickaxe.
+
+Your possible answer:
+
+Explain: we need wood for crafting wood pickaxe. So, we need to ensure that we have enough wood in order to do that. First of all, we want to obtain enough wood for a crafting table. After that we want to get enough wood for a wooden sword. If we have enough wood for crafting a table AND crafting table in front of us, then we can craft it immediately.
+Plan:
+1) Check amount of wood in inventory
+2) Calculate the amount of wood needed for crafting a table AND sword.
+3) If we do not have enough wood, mine until it is enough.
+4) Make sure that we can place a crafting table in front of us.
+5) Place a crafting table in front of us.
+6) Craft wood pickaxe.
+
+Code:
+
+```python
+def create_wood_pickaxe(env):
+    # check how many wood we have in inventory
+    wood = check_inventory_wood(env)
+    # ensure that we have enough wood in inventory
+    # we want to obtain 2 wood for crafting table
+    # AND 1 wood for crafting pickaxe
+    required_wood = 3
+    if wood < required_wood:
+        mine_block(env, BlockType.TREE, required_wood - wood)
+    # place a crafting table in front of us
+    act_PLACE_TABLE(env)
+    # craft wood pickaxe
+    act_MAKE_WOOD_PICKAXE(env)
+
+```

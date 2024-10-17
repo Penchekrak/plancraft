@@ -64,13 +64,13 @@ CHECKERS = [
 # TASKS_CHECKERS = {TASKS[i]: CHECKERS[i] for i in range(len(TASKS))}
 
 # TASK = 'Collect wood'
-ID = 1
+ID = 3
 TASK = TASKS[ID]
 TASK_CHECKER = {TASKS[ID]: CHECKERS[ID]}
 SPLIT_SYMBOL = '@@@@@@@@'
-N_GENS = 3
-N_REPLANS = 3
-SEED_ = 0xBAD_5EED_B00B5 + 45
+N_GENS = 2
+N_REPLANS = 5
+SEED_ = 0xBAD_5EED_B00B5 + 42
 N_SEEDS = 1
 SEEDS = [SEED_ + i for i in range(1, N_SEEDS + 1)]
 
@@ -87,10 +87,10 @@ def exec_code(code, env):
     new_symbols = {}
     exec(code, globals(), new_symbols)  # define all generated functions
     # new_symbols = set(locals().keys()).union(set(globals().keys())).difference(old_symbols)
-    print(f"{new_symbols=}")
+    # print(f"{new_symbols=}")
 
     func_name, _ = find_most_function_calls(code, set(new_symbols.keys()))
-    exec(f"{func_name}(env)", globals(), locals() | new_symbols)
+    exec(code + f"\n\n{func_name}(env)", globals() | {'env': env})
 
     # for func in new_symbols:
     #     del locals()[func]
@@ -109,6 +109,8 @@ def main(env, gen_idx):
     with open(f'{llm_dir}/prompt.txt', 'r') as file:
         content_prompt = file.read()
 
+    with open(f'{llm_dir}/code_gen.py', 'r') as generated_code:
+        content_prompt += '\n' + generated_code.read()
     # #do some stuff
     stat_dict, inventory_values, blocks_dict = parse_state(state)
 
@@ -160,7 +162,7 @@ def main(env, gen_idx):
 
         except Exception as e:
             error_feedback = e
-            logger.info(error_feedback)
+            logger.info('error feedback' + str(error_feedback))
             continue
 
         stat_dict, inventory_values, blocks_dict = parse_state(env.saved_state)
@@ -208,9 +210,9 @@ if __name__ == '__main__':
             try:
                 exec_code(code, env)
                 result = TASK_CHECKER[TASK](env)
-                visual_testing(seed, log_dir + f'/actions.txt', log_dir, 1, env, renderer,
+                visual_testing(env, log_dir + f'/actions.txt', log_dir, 1, renderer,
                                grid_size=(1, 1), gif_name=f'gif_{TASK}_{idx}_{seed}_{result}.gif')
-                os.remove(log_dir + f'/actions.txt')
+                # os.remove(log_dir + f'/actions.txt')
             except Exception as e:
                 logger.info(e)
                 result = 0
