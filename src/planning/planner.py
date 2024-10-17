@@ -7,10 +7,17 @@ from typing import Tuple, Type
 
 from craftax.craftax_env import make_craftax_env_from_name
 
-from environment.wrapper import SaveStateWrapper
+from src.environment.wrapper import SaveStateWrapper
 from src.primitives.checks import *
 from src.environment.code_parser import find_most_function_calls
 from src.planning.llm_caller import LLMCaller
+
+# functions for bot:
+from src.primitives.simple_actions import *
+from src.primitives.mine_block import mine_block
+from src.primitives.explore_until import explore_until
+from craftax.craftax.constants import BlockType
+
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 log_dir = '../../test/logs/'
