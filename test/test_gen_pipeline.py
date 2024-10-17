@@ -30,8 +30,8 @@ from src.primitives.checks import *
 import logging
 import ast
 
-SEED = 0xBAD_5EED_B00B5
-SEEDS = [SEED + i for i in range(10)]
+SEED_ = 0xBAD_5EED_B00B5
+SEEDS = [SEED_ + i for i in range(1, 11)]
 
 # TASKS = [
 #     'Collect wood',
@@ -64,18 +64,35 @@ SEEDS = [SEED + i for i in range(10)]
 TASK = 'Create iron sword'
 TASK_CHECKER = {'Create iron sword': check_inventory_iron_sword}
 SPLIT_SYMBOL = '@@@@@@@@'
+N_GENS = 3
+N_REPLANS = 3
 
-if __name__ == '__main__':
-# def main():
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logger = logging.getLogger('main_logger')
+handler = logging.StreamHandler(sys.stdout)
+logger.addHandler(handler)
+
+
+def exec_code(code, env):
+    old_symbols = set(locals().keys()).union(set(globals().keys())).union({'old_symbols'})
+    print(f"{old_symbols=}")
+    exec(code)  # define all generated functions
+    new_symbols = set(locals().keys()).union(set(globals().keys())).difference(old_symbols)
+    print(f"{new_symbols=}")
+
+    func_name, _ = find_most_function_calls(code, new_symbols)
+    exec(f"{func_name}(env)")
+
+    for func in new_symbols:
+        del locals()[func]
+
+
+# if __name__ == '__main__':
+def main(SEED):
     importlib.reload(renderer)
     env = make_craftax_env_from_name("Craftax-Symbolic-v1", auto_reset=False)
     env = SaveStateWrapper(env, seed=SEED, log_dir=log_dir)
     obs, state = env.reset()
-
-    logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-    logger = logging.getLogger('main_logger')
-    handler = logging.StreamHandler(sys.stdout)
-    logger.addHandler(handler)
 
     with open(log_dir + '/actions.txt', 'w') as f:
         pass
@@ -107,9 +124,8 @@ if __name__ == '__main__':
 
     history = []
     result, error_feedback = None, None
-    present_symbols = {}
 
-    for i in range(5):
+    for i in range(N_REPLANS):
         if i >= 1:
             env.reset()
             history.extend([
@@ -131,20 +147,8 @@ if __name__ == '__main__':
         print(code)
         print("-" * 100)
 
-        # exec('print(1337)')
-        old_symbols = set(locals().keys()).union(set(globals().keys())).union({'old_symbols'})
-        print(f"{old_symbols=}")
-        exec(code)  # define all generated functions
-        new_symbols = set(locals().keys()).union(set(globals().keys())).difference(old_symbols)
-        print(f"{new_symbols=}")
-
         try:
-            # eval((func_name := next(iter(new_symbols))) + '(env)')
-            func_name, _ = find_most_function_calls(code, new_symbols)
-            exec(f"{func_name}(env)")
-            for func in new_symbols:
-                del locals()[func]
-
+            exec_code(code, env)
         except Exception as e:
             error_feedback = e
             logger.info(error_feedback)
@@ -159,11 +163,11 @@ if __name__ == '__main__':
         os.remove(log_dir + f'/actions.txt')
 
         if result := TASK_CHECKER[TASK](env):
-            f = open(f'{llm_dir}/code_gen.py', 'a+')
-            print(code, file=f)
-
-            content_prompt = content_prompt_1 + "\n" + f + "\n" + content_prompt_2 + "\n" + SPLIT_SYMBOL
-            f.close()
+            # f = open(f'{llm_dir}/code_gen.py', 'a+')
+            # print(code, file=f)
+            #
+            # content_prompt = content_prompt_1 + "\n" + f + "\n" + content_prompt_2 + "\n" + SPLIT_SYMBOL
+            # f.close()
 
             break
 
@@ -171,5 +175,34 @@ if __name__ == '__main__':
         logger.info('%' * 100)
         time.sleep(7)
 
+    return code, result
 
-# if __name__ == '__main__':
+
+if __name__ == '__main__':
+    sr = 0
+    importlib.reload(renderer)
+    env = make_craftax_env_from_name("Craftax-Symbolic-v1", auto_reset=False)
+    env = SaveStateWrapper(env, seed=SEED_, log_dir=log_dir)
+    obs, state = env.reset()
+
+    for _ in range(N_GENS):
+        code, result = main(SEED_)
+
+        for seed in SEEDS:
+            env.reset(seed=seed)
+
+            try:
+                exec_code(code, env)
+                result = TASK_CHECKER[TASK](env)
+            except Exception as e:
+                logger.info(e)
+                result = 0
+
+            sr += result
+        sr /= len(SEEDS)
+        print(f'Score: {sr}')
+        f = open(f'{llm_dir}/code_gen_{_}_{round(sr, 2)}.py', 'w+')
+        print(code, file=f)
+        f.close()
+
+    print(f'Score: {sr / len(SEEDS)}')
