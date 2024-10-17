@@ -31,7 +31,36 @@ import logging
 import ast
 
 SEED = 0xBAD_5EED_B00B5
-TASK = 'Create iron sword'
+
+TASKS = [
+    'Collect wood',
+    # 'Place crafting table',
+    'Make wood pickaxe',
+    'Collect stone',
+    'Make stone pickaxe',
+    'Collect coal',
+    'Collect iron',
+    # 'Place furnace',
+    'Make iron pickaxe',
+    'Collect diamond'
+]
+
+CHECKERS = [
+    check_inventory_wood,
+    # ,
+    check_inventory_wood_pickaxe,
+    check_inventory_stone,
+    check_inventory_stone_pickaxe,
+    check_inventory_coal,
+    check_inventory_iron,
+    # ,
+    check_inventory_iron_pickaxe,
+    check_inventory_diamond
+]
+
+TASKS_CHECKERS = {TASKS[i]: CHECKERS[i] for i in range(len(TASKS))}
+
+
 TASK_CHECKER = {'Create iron sword': check_inventory_iron_sword}
 SPLIT_SYMBOL = '@@@@@@@@'
 
