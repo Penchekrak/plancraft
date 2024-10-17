@@ -111,6 +111,7 @@ if __name__ == '__main__':
         try:
             # eval((func_name := next(iter(new_symbols))) + '(env)')
             func_name, _ = find_most_function_calls(code, new_symbols)
+            exec(f"{func_name}(env)")
             for func in new_symbols:
                 del locals()[func]
 
