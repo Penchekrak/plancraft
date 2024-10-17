@@ -64,9 +64,9 @@ if __name__ == '__main__':
         act_DO(env)
 
     # # Render
-    logger.info('Rendering...')
+    logger.debug('Rendering...')
 
     visual_testing(SEED, log_dir + '/actions.txt', log_dir, 1, env, renderer,
                    grid_size=(1, 1))
 
-    logger.info('Finished')
+    logger.debug('Finished')

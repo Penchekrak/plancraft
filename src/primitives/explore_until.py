@@ -14,7 +14,10 @@ logger = logging.getLogger()
 
 def explore_until(env, callback: BlockType | typing.Callable[[typing.Any], bool],
                   max_iter = 25, prev_pos: jax.numpy.ndarray | None = None):
-    logger.info(f'exploring...')
+    if isinstance(callback, BlockType):
+        logger.info(f'exploring for {callback}...')
+    else:
+        logger.info('exploring...')
 
     can_dig = env.saved_state.inventory.pickaxe
     can_place = check_inventory_stone(env)
@@ -29,11 +32,10 @@ def explore_until(env, callback: BlockType | typing.Callable[[typing.Any], bool]
     if prev_pos is None:
         prev_pos = env.saved_state.player_position
     for i in range(max_iter):
-        logger.debug(f'exploring, step {i}/{max_iter}...')
         if callback_fn(env):
-            logger.info(f'Done exploring after {i} iterations.')
+            logger.debug(f'Done exploring after {i} iterations.')
             if isinstance(callback, BlockType):
-                logger.info(f'Found {callback} in pos {find_block_any(env.saved_state, callback)}.')
+                logger.info(f'Found {callback}.')
             break
 
         G = gen_graph_smart(env.saved_state, can_dig, can_place)
@@ -42,7 +44,7 @@ def explore_until(env, callback: BlockType | typing.Callable[[typing.Any], bool]
         move_to_pos(env, pos, G, can_dig, can_place)
 
     else:
-        logger.info(f'No block found after {max_iter} iterations.')
+        logger.debug(f'No block found after {max_iter} iterations.')
 
 def block_in_obs_callback(env, block_type: BlockType):
     return find_block_any(env.saved_state, block_type) is not None
