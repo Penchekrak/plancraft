@@ -25,11 +25,15 @@ def check_nearby_furnace(env):
     return False
 
 
+class MaxStepsException(Exception):
+    pass
+
 
 def executor(env: SaveStateWrapper, action_list: list[Action]):
     # append acton_list to actions.csv
     action_log_file = os.path.join(env.log_dir, 'actions.txt')
     logger.debug(f'acting: {action_list}')
+
     with open(action_log_file, 'a+') as f:
         # execute actions
         for action in action_list:
@@ -107,3 +111,7 @@ def executor(env: SaveStateWrapper, action_list: list[Action]):
                 logger.info("ERROR: Can not dig iron! Need stone pickaxe!")
 
             obs, state, reward, done, info = env.step(action)
+
+            if env.action_count >= env.max_steps:
+                logger.info("ERROR: Max steps reached!")
+                raise MaxStepsException("Max steps reached!")
