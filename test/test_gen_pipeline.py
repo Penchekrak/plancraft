@@ -99,11 +99,9 @@ def exec_code(code, env):
 
 
 # if __name__ == '__main__':
-def main(SEED, gen_idx):
+def main(env, gen_idx):
     importlib.reload(renderer)
-    env = make_craftax_env_from_name("Craftax-Symbolic-v1", auto_reset=False)
-    env = SaveStateWrapper(env, seed=SEED, log_dir=log_dir)
-    obs, state = env.reset(seed=SEED)
+    obs, state = env.reset()
 
     with open(log_dir + '/actions.txt', 'w') as f:
         pass
@@ -137,7 +135,7 @@ def main(SEED, gen_idx):
     ans = None
     for i in tqdm(range(N_REPLANS), desc='Replaning...'):
         if i >= 1:
-            env.reset(seed=SEED)
+            env.reset()
             history.extend([
                 {
                     'role': 'assistant',
@@ -202,7 +200,7 @@ if __name__ == '__main__':
     # main(SEED_)
     for idx in tqdm(range(N_GENS), desc='Generating...'):
         sr = 0
-        code, result = main(SEED_, idx)
+        code, result = main(env, idx)
 
         for seed in tqdm(SEEDS, desc='Seeding...'):
             env.reset(seed=seed)
