@@ -16,6 +16,9 @@ def mine_block(env, block_type: BlockType, count: int = 1, max_iter = 25):
     can_dig = env.saved_state.inventory.pickaxe
     can_place = check_inventory_stone(env)
 
+    if block_type == BlockType.WOOD:
+        block_type = BlockType.TREE
+
     for block_iteration in range(count):
         logger.debug(f'iteration {block_iteration}/{count} of find_block...')
         explore_until(env, callback=block_type, max_iter=max_iter)
