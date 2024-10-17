@@ -64,14 +64,14 @@ CHECKERS = [
 # TASKS_CHECKERS = {TASKS[i]: CHECKERS[i] for i in range(len(TASKS))}
 
 # TASK = 'Collect wood'
-ID = 0
+ID = 1
 TASK = TASKS[ID]
 TASK_CHECKER = {TASKS[ID]: CHECKERS[ID]}
 SPLIT_SYMBOL = '@@@@@@@@'
 N_GENS = 3
 N_REPLANS = 3
 SEED_ = 0xBAD_5EED_B00B5 + 42
-N_SEEDS = 2
+N_SEEDS = 1
 SEEDS = [SEED_ + i for i in range(1, N_SEEDS + 1)]
 
 
@@ -153,18 +153,7 @@ def main(SEED, gen_idx):
             )
 
         try:
-            # ans, code = gen_code(system_prompt, content_prompt, history, save=True)
-            code = '''
-def collect_wood(env):
-    # check how many wood we have in inventory
-    wood = check_inventory_wood(env)
-    # we want to obtain at least 1 wood
-    required_wood = 1
-    if wood < required_wood:
-        # mine BlockType.TREE until we have enough wood
-        wood_needed = required_wood - wood
-        mine_block(env, BlockType.TREE, wood_needed, max_iter=50)
-        '''
+            ans, code = gen_code(system_prompt, content_prompt, history, save=True)
             print("-" * 100)
             print(code)
             print("-" * 100)
