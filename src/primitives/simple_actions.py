@@ -2,8 +2,8 @@ import logging
 from turtledemo.sorting_animate import Block
 
 from craftax.craftax.constants import Action, BlockType, DIRECTIONS
-from environment.executor import check_nearby_table, check_nearby_furnace
-from primitives.checks import *
+from src.environment.executor import check_nearby_table, check_nearby_furnace
+from src.primitives.checks import *
 from src.environment.executor import executor
 from src.graphs.move_to_node_smart import DIRECTIONS_TO_ACTIONS, NEED_DIG, NEED_CHOP
 

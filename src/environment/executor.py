@@ -1,7 +1,7 @@
 from craftax.craftax.constants import Action, CLOSE_BLOCKS, BlockType, DIRECTIONS
 import os
 
-from primitives.checks import *
+from src.primitives.checks import *
 from src.environment.wrapper import SaveStateWrapper
 import logging
 
